@@ -2,8 +2,14 @@ package minesweeper;
 
 import java.util.Arrays;
 
+/** Exercises minefield construction, validation, and region-reveal behavior. */
 public class MineFieldTester {
 
+    /**
+     * Runs all {@link MineField} tests.
+     *
+     * @param args command-line arguments; ignored
+     */
     public static void main(String[] args) {
         testConstructionAndMineCounts();
         testCoordinateValidation();
@@ -19,6 +25,7 @@ public class MineFieldTester {
         System.out.println("All MineField tests passed.");
     }
 
+    /** Verifies field dimensions, square states, and adjacent-mine counts. */
     private static void testConstructionAndMineCounts() {
         String[] rows = {
             "*...",
@@ -82,6 +89,7 @@ public class MineFieldTester {
         );
     }
 
+    /** Verifies valid-coordinate detection and invalid-coordinate exceptions. */
     private static void testCoordinateValidation() {
         MineField field = new MineField(
             new String[]{
@@ -128,6 +136,7 @@ public class MineFieldTester {
         );
     }
 
+    /** Verifies that revealing a numbered square does not reveal neighbors. */
     private static void testNumberedSquareReveal() {
         MineField field = new MineField(
             new String[]{
@@ -172,6 +181,7 @@ public class MineFieldTester {
         );
     }
 
+    /** Verifies expansion through a connected region of zero-count squares. */
     private static void testZeroRegionReveal() {
         MineField field = new MineField(
             new String[]{
@@ -238,6 +248,7 @@ public class MineFieldTester {
         );
     }
 
+    /** Verifies that a mine barrier prevents expansion into another region. */
     private static void testDisconnectedRegionRemainsHidden() {
         MineField field = new MineField(
             new String[]{
@@ -294,6 +305,7 @@ public class MineFieldTester {
         );
     }
 
+    /** Verifies that region reveal does not reveal a selected mine. */
     private static void testMineIsNotRevealed() {
         MineField field = new MineField(
             new String[]{
@@ -321,6 +333,7 @@ public class MineFieldTester {
         );
     }
 
+    /** Verifies that region reveal preserves flagged squares. */
     private static void testFlaggedSquareIsNotRevealed() {
         MineField field = new MineField(
             new String[]{
@@ -387,6 +400,7 @@ public class MineFieldTester {
         );
     }
 
+    /** Verifies that revealing an already revealed region is harmless. */
     private static void testRepeatedReveal() {
         MineField field = new MineField(
             new String[]{
@@ -416,6 +430,7 @@ public class MineFieldTester {
         );
     }
 
+    /** Verifies iterative expansion across a large empty field. */
     private static void testLargeEmptyRegion() {
         int size = 100;
         String[] rows = new String[size];
@@ -447,6 +462,7 @@ public class MineFieldTester {
         );
     }
 
+    /** Verifies rejection of null, empty, irregular, and invalid field data. */
     private static void testConstructorValidation() {
         expectException(
             NullPointerException.class,
@@ -491,6 +507,15 @@ public class MineFieldTester {
         );
     }
 
+    /**
+     * Checks the state of one field square.
+     *
+     * @param field field containing the square
+     * @param row square row
+     * @param col square column
+     * @param expectedState expected state
+     * @param message failure message
+     */
     private static void checkState(
         MineField field,
         int row,
@@ -508,12 +533,25 @@ public class MineFieldTester {
         );
     }
 
+    /**
+     * Fails the test run when a condition is false.
+     *
+     * @param condition condition that must hold
+     * @param message failure message
+     */
     private static void check(boolean condition, String message) {
         if (!condition) {
             throw new AssertionError(message);
         }
     }
 
+    /**
+     * Verifies that an action throws the expected exception type.
+     *
+     * @param expectedType expected exception class
+     * @param action action to execute
+     * @param message failure message
+     */
     private static void expectException(
         Class<? extends Throwable> expectedType,
         Runnable action,

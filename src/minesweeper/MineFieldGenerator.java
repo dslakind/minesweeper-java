@@ -3,14 +3,22 @@ package minesweeper;
 import java.util.Objects;
 import java.util.Random;
 
+/** Creates randomized Minesweeper fields with a requested size and mine count. */
 public class MineFieldGenerator {
 
     private final Random rand;
 
+    /** Creates a generator backed by a new pseudorandom number generator. */
     public MineFieldGenerator() {
         this(new Random());
     }
 
+    /**
+     * Creates a generator backed by the supplied random source.
+     *
+     * @param random random source used to choose mine positions
+     * @throws NullPointerException if {@code random} is {@code null}
+     */
     public MineFieldGenerator(Random random) {
         rand = Objects.requireNonNull(
             random, 
@@ -18,8 +26,16 @@ public class MineFieldGenerator {
         );
     }
 
-
-    // generate(rows, columns, mineCount) → MineField
+    /**
+     * Generates a field containing distinct, randomly positioned mines.
+     *
+     * @param rows number of rows; must be positive
+     * @param columns number of columns; must be positive
+     * @param mineCount number of mines; must be nonnegative and smaller than
+     *        the number of squares
+     * @return newly generated minefield
+     * @throws IllegalArgumentException if the dimensions or mine count are invalid
+     */
     public MineField generate(int rows, int columns, int mineCount) {
         // verify valid dimensions
         if (rows <= 0 || columns <= 0) {

@@ -17,12 +17,22 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-public class MinesweeperGUI extends JFrame{
+/**
+ * Swing window for playing a standard beginner Minesweeper game.
+ * Left-clicking reveals squares, right-clicking toggles flags, and the new-game
+ * button creates a fresh randomized board.
+ */
+public class MinesweeperGUI extends JFrame {
     // instance variables
+    /** Game currently displayed by this window. */
     private Game currentGame;
+    /** Generator used to create each new field. */
     private final MineFieldGenerator fieldGenerator;
+    /** Container that arranges the square buttons. */
     private final JPanel boardPanel;
+    /** Label displaying whether the game is active, won, or lost. */
     private final JLabel gameStatusLabel;
+    /** Buttons indexed by their corresponding field coordinates. */
     private JButton[][] squareButtons;
 
     // constants
@@ -61,7 +71,7 @@ public class MinesweeperGUI extends JFrame{
     private static final Font BOMB_FONT =
         new Font("Segoe UI Emoji", Font.PLAIN, 20);
 
-    /** Builds the window and initial game */
+    /** Builds the window and starts the initial game. */
     public MinesweeperGUI() {
         
         fieldGenerator = new MineFieldGenerator();
@@ -102,7 +112,7 @@ public class MinesweeperGUI extends JFrame{
         setLocationRelativeTo(null); // center on screen
     }
 
-    /** Creates and arranges the square buttons */
+    /** Creates and arranges one button for every square in the current game. */
     private void buildBoard() {
         boardPanel.removeAll(); // Remove any existing controls from boardPanel.
 
@@ -165,7 +175,7 @@ public class MinesweeperGUI extends JFrame{
         refreshView();
     }
 
-    /** refreshView() Updates buttons and status from the model */
+    /** Updates all square buttons and status text from the game model. */
     private void refreshView() {
         // get the Square state and set the button text for each button
         for (int r = 0; r < currentGame.numRows(); r++) {
@@ -231,6 +241,7 @@ public class MinesweeperGUI extends JFrame{
         updateGameStatusLabel();
     }
 
+    /** Displays all mines and removes button borders when the game has ended. */
     private void gameOver() {
         GameStatus gameStatus = currentGame.getStatus() ;
         // disable every square button.
@@ -251,19 +262,29 @@ public class MinesweeperGUI extends JFrame{
         }
     }
 
-    /** handleLeftClick(row, col)	Reveals a square */
+    /**
+     * Reveals a square in response to a primary-button click.
+     *
+     * @param row zero-based row of the clicked square
+     * @param col zero-based column of the clicked square
+     */
     private void handleLeftClick(int row, int col) {
         currentGame.revealSquare(row, col);
         refreshView();
     }
     
-    /** handleRightClick(row, col)	Toggles a flag  */
+    /**
+     * Toggles a flag in response to a secondary-button click.
+     *
+     * @param row zero-based row of the clicked square
+     * @param col zero-based column of the clicked square
+     */
     private void handleRightClick(int row, int col) {
         currentGame.toggleFlag(row, col);
         refreshView();
     }
 
-    /** startNewGame()	Generates and installs a new game */
+    /** Generates a fresh minefield and rebuilds the board controls. */
     private void startNewGame() {
         currentGame = new Game(fieldGenerator.generate(ROWS, COLUMNS, MINES));
 
@@ -274,6 +295,12 @@ public class MinesweeperGUI extends JFrame{
         pack();
     }
 
+    /**
+     * Selects the conventional display color for a neighboring-mine count.
+     *
+     * @param count adjacent mine count
+     * @return color used to draw the number
+     */
     private Color getNumberColor(int count) {
         switch (count) {
             case 1:
@@ -297,6 +324,7 @@ public class MinesweeperGUI extends JFrame{
         }
     }    
 
+    /** Updates the status label's message and color for the current game state. */
     private void updateGameStatusLabel() {
         GameStatus gameStatus = currentGame.getStatus();
 

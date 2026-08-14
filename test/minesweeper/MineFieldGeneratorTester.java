@@ -2,8 +2,14 @@ package minesweeper;
 
 import java.util.Random;
 
+/** Exercises randomized minefield generation and input validation. */
 public class MineFieldGeneratorTester {
 
+    /**
+     * Runs all {@link MineFieldGenerator} tests.
+     *
+     * @param args command-line arguments; ignored
+     */
     public static void main(String[] args) {
         testOrdinarySquareField();
         testWideRectangularField();
@@ -19,6 +25,7 @@ public class MineFieldGeneratorTester {
         System.out.println("All MineFieldGenerator tests passed.");
     }
 
+    /** Verifies generation of a typical square field. */
     private static void testOrdinarySquareField() {
         MineFieldGenerator generator = new MineFieldGenerator();
         MineField field = generator.generate(8, 8, 10);
@@ -26,6 +33,7 @@ public class MineFieldGeneratorTester {
         verifyGeneratedField(field, 8, 8, 10);
     }
 
+    /** Verifies generation of a field wider than it is tall. */
     private static void testWideRectangularField() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(12345L));
@@ -34,6 +42,7 @@ public class MineFieldGeneratorTester {
         verifyGeneratedField(field, 2, 5, 4);
     }
 
+    /** Verifies generation of a field taller than it is wide. */
     private static void testTallRectangularField() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(54321L));
@@ -42,6 +51,7 @@ public class MineFieldGeneratorTester {
         verifyGeneratedField(field, 5, 2, 4);
     }
 
+    /** Verifies the smallest legal field. */
     private static void testSingleSquareField() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(50L));
@@ -50,6 +60,7 @@ public class MineFieldGeneratorTester {
         verifyGeneratedField(field, 1, 1, 0);
     }
 
+    /** Verifies generation of a mine-free field. */
     private static void testZeroMines() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(100L));
@@ -69,6 +80,7 @@ public class MineFieldGeneratorTester {
         }
     }
 
+    /** Verifies the largest legal mine count for a field. */
     private static void testMaximumLegalMineCount() {
         int rows = 3;
         int columns = 4;
@@ -81,6 +93,7 @@ public class MineFieldGeneratorTester {
         verifyGeneratedField(field, rows, columns, mineCount);
     }
 
+    /** Verifies deterministic layouts when generators use the same seed. */
     private static void testRepeatabilityWithFixedSeed() {
         long seed = 987654321L;
 
@@ -98,6 +111,7 @@ public class MineFieldGeneratorTester {
         verifyGeneratedField(second, 7, 11, 15);
     }
 
+    /** Verifies that the generator rejects a null random source. */
     private static void testNullRandom() {
         expectException(
             NullPointerException.class,
@@ -106,6 +120,7 @@ public class MineFieldGeneratorTester {
         );
     }
 
+    /** Verifies rejection of nonpositive dimensions. */
     private static void testInvalidDimensions() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(300L));
@@ -132,6 +147,7 @@ public class MineFieldGeneratorTester {
         );
     }
 
+    /** Verifies rejection of mine counts outside the legal range. */
     private static void testInvalidMineCounts() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(400L));
@@ -153,6 +169,14 @@ public class MineFieldGeneratorTester {
         );
     }
 
+    /**
+     * Verifies dimensions, mine count, initial states, and adjacency counts.
+     *
+     * @param field generated field
+     * @param expectedRows expected row count
+     * @param expectedColumns expected column count
+     * @param expectedMineCount expected mine count
+     */
     private static void verifyGeneratedField(
         MineField field,
         int expectedRows,
@@ -208,6 +232,14 @@ public class MineFieldGeneratorTester {
         );
     }
 
+    /**
+     * Independently counts mines adjacent to a square.
+     *
+     * @param field field to inspect
+     * @param row square row
+     * @param col square column
+     * @return number of neighboring mines
+     */
     private static int countAdjacentMines(
         MineField field,
         int row,
@@ -235,6 +267,13 @@ public class MineFieldGeneratorTester {
         return count;
     }
 
+    /**
+     * Compares the mine placement of two fields.
+     *
+     * @param first first field
+     * @param second second field
+     * @return {@code true} when dimensions and mine positions match
+     */
     private static boolean layoutsMatch(
         MineField first,
         MineField second
@@ -256,12 +295,25 @@ public class MineFieldGeneratorTester {
         return true;
     }
 
+    /**
+     * Fails the test run when a condition is false.
+     *
+     * @param condition condition that must hold
+     * @param message failure message
+     */
     private static void check(boolean condition, String message) {
         if (!condition) {
             throw new AssertionError(message);
         }
     }
 
+    /**
+     * Verifies that an action throws the expected exception type.
+     *
+     * @param expectedType expected exception class
+     * @param action action to execute
+     * @param message failure message
+     */
     private static void expectException(
         Class<? extends Throwable> expectedType,
         Runnable action,

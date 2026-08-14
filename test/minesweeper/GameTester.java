@@ -1,7 +1,13 @@
 package minesweeper;
 
+/** Exercises game actions, state transitions, and coordinate validation. */
 public class GameTester {
 
+    /**
+     * Runs all {@link Game} tests.
+     *
+     * @param args command-line arguments; ignored
+     */
     public static void main(String[] args) {
         testConstructorAndInitialState();
         testNumberedSquareReveal();
@@ -18,6 +24,7 @@ public class GameTester {
         System.out.println("All Game tests passed.");
     }
 
+    /** Verifies construction, initial status, dimensions, and null rejection. */
     private static void testConstructorAndInitialState() {
         MineField field = new MineField(
             new String[]{
@@ -46,6 +53,7 @@ public class GameTester {
         );
     }
 
+    /** Verifies that revealing a numbered square does not expand a region. */
     private static void testNumberedSquareReveal() {
         Game game = new Game(
             new MineField(
@@ -84,6 +92,7 @@ public class GameTester {
         );
     }
 
+    /** Verifies zero-region expansion and the resulting win. */
     private static void testZeroRegionRevealAndWin() {
         Game game = new Game(
             new MineField(
@@ -133,6 +142,7 @@ public class GameTester {
         );
     }
 
+    /** Verifies that revealing the last safe square wins the game. */
     private static void testFinalSafeSquareWinsGame() {
         Game game = new Game(
             new MineField(
@@ -158,6 +168,7 @@ public class GameTester {
         );
     }
 
+    /** Verifies that revealing a mine loses the game. */
     private static void testMineRevealLosesGame() {
         Game game = new Game(
             new MineField(
@@ -190,6 +201,7 @@ public class GameTester {
         );
     }
 
+    /** Verifies flag placement and removal. */
     private static void testFlaggingAndUnflagging() {
         Game game = new Game(
             new MineField(
@@ -224,6 +236,7 @@ public class GameTester {
         );
     }
 
+    /** Verifies that a flagged square cannot be revealed. */
     private static void testFlaggedSquareCannotBeRevealed() {
         Game game = new Game(
             new MineField(
@@ -250,6 +263,7 @@ public class GameTester {
         );
     }
 
+    /** Verifies that a revealed square cannot be flagged. */
     private static void testRevealedSquareCannotBeFlagged() {
         Game game = new Game(
             new MineField(
@@ -273,6 +287,7 @@ public class GameTester {
         );
     }
 
+    /** Verifies that player actions are ignored after a win. */
     private static void testActionsAfterWinDoNothing() {
         Game game = new Game(
             new MineField(
@@ -312,6 +327,7 @@ public class GameTester {
         );
     }
 
+    /** Verifies that player actions are ignored after a loss. */
     private static void testActionsAfterLossDoNothing() {
         Game game = new Game(
             new MineField(
@@ -351,6 +367,7 @@ public class GameTester {
         );
     }
 
+    /** Verifies that square operations reject out-of-range coordinates. */
     private static void testInvalidCoordinates() {
         Game game = new Game(
             new MineField(
@@ -401,6 +418,15 @@ public class GameTester {
         );
     }
 
+    /**
+     * Checks the state of one game square.
+     *
+     * @param game game containing the square
+     * @param row square row
+     * @param col square column
+     * @param expectedState expected state
+     * @param message failure message
+     */
     private static void checkState(
         Game game,
         int row,
@@ -418,12 +444,25 @@ public class GameTester {
         );
     }
 
+    /**
+     * Fails the test run when a condition is false.
+     *
+     * @param condition condition that must hold
+     * @param message failure message
+     */
     private static void check(boolean condition, String message) {
         if (!condition) {
             throw new AssertionError(message);
         }
     }
 
+    /**
+     * Verifies that an action throws the expected exception type.
+     *
+     * @param expectedType expected exception class
+     * @param action action to execute
+     * @param message failure message
+     */
     private static void expectException(
         Class<? extends Throwable> expectedType,
         Runnable action,

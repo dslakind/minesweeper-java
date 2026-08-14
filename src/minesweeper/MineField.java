@@ -4,10 +4,21 @@ import java.util.Objects;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-
+/**
+ * Represents a rectangular Minesweeper field and its mine-adjacency data.
+ */
 public class MineField {
     private final Square[][] squares;
 
+    /**
+     * Creates a field from rows containing {@code '*'} for mines and
+     * {@code '.'} for safe squares.
+     *
+     * @param rows rectangular textual representation of the field
+     * @throws NullPointerException if the array or any row is {@code null}
+     * @throws IllegalArgumentException if the field is empty, non-rectangular,
+     *         or contains an unsupported character
+     */
     public MineField(String[] rows) {
         // validate that the matrix is nonempty and rectangular
         Objects.requireNonNull(rows, "MineField requires a String[] to process");
@@ -59,14 +70,32 @@ public class MineField {
         calculateAdjacentMines();
     }
 
+    /**
+     * Returns the height of this field.
+     *
+     * @return number of rows in this field
+     */
     public int numRows() {
         return squares.length;
     }
 
+    /**
+     * Returns the width of this field.
+     *
+     * @return number of columns in this field
+     */
     public int numCols() {
         return squares[0].length;
     }
 
+    /**
+     * Returns a square by its zero-based coordinates.
+     *
+     * @param row row index
+     * @param col column index
+     * @return square at the requested position
+     * @throws IndexOutOfBoundsException if the coordinates are outside the field
+     */
     public Square getSquare(int row, int col) {
         if (!isValidSquare(row, col)) {
             throw new IndexOutOfBoundsException(
@@ -76,6 +105,13 @@ public class MineField {
         return squares[row][col];
     }
 
+    /**
+     * Determines whether coordinates identify a square in this field.
+     *
+     * @param row row index to test
+     * @param col column index to test
+     * @return {@code true} when the coordinates are within the field
+     */
     public boolean isValidSquare(int row, int col) {
         return row >= 0 && row < numRows() && 
             col >= 0 && col < numCols();
@@ -96,6 +132,14 @@ public class MineField {
             !getSquare(row, col).hasMine();
     }
 
+    /**
+     * Reveals a safe square and expands through adjacent empty squares. Numbered
+     * boundary squares are revealed, while mines and flagged squares remain hidden.
+     *
+     * @param row row at which to begin revealing
+     * @param col column at which to begin revealing
+     * @throws IndexOutOfBoundsException if the coordinates are outside the field
+     */
     public void revealRegion(int row, int col) {
         if (!isValidSquare(row, col)) {
             throw new IndexOutOfBoundsException(
@@ -160,6 +204,11 @@ public class MineField {
 
     }
 
+    /**
+     * Reports whether all non-mine squares have been revealed.
+     *
+     * @return {@code true} if no safe hidden or flagged squares remain
+     */
     public boolean allSafeSquaresRevealed() {
         for (Square[] row : squares) {
             for (Square square : row) {
@@ -192,6 +241,7 @@ public class MineField {
     }
 
 
+    /** Immutable row and column used by the region-reveal traversal. */
     private static class Position {
 
         private final int row;
@@ -218,4 +268,3 @@ public class MineField {
     }
 
 }
-
