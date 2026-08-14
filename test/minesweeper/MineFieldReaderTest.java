@@ -3,8 +3,14 @@ package minesweeper;
 import java.util.List;
 import java.util.Scanner;
 
+/** Exercises parsing of valid, terminated, malformed, and incomplete fields. */
 public class MineFieldReaderTest {
 
+    /**
+     * Runs all {@link MineFieldReader} tests.
+     *
+     * @param args command-line arguments; ignored
+     */
     public static void main(String[] args) {
         testValidInput();
         testImmediateTerminator();
@@ -18,6 +24,7 @@ public class MineFieldReaderTest {
         System.out.println("All MineFieldReader tests passed.");
     }
 
+    /** Verifies parsing of multiple valid minefields. */
     private static void testValidInput() {
         String input =
             "4 4\n"
@@ -55,6 +62,7 @@ public class MineFieldReaderTest {
         );
     }
 
+    /** Verifies that an immediate terminator produces no fields. */
     private static void testImmediateTerminator() {
         List<MineField> fields = readFields("0 0\n");
 
@@ -64,6 +72,7 @@ public class MineFieldReaderTest {
         );
     }
 
+    /** Verifies rejection of a null scanner. */
     private static void testNullScanner() {
         expectException(
             NullPointerException.class,
@@ -72,6 +81,7 @@ public class MineFieldReaderTest {
         );
     }
 
+    /** Verifies rejection of missing or nonnumeric dimension headers. */
     private static void testInvalidHeaders() {
         expectException(
             IllegalStateException.class,
@@ -92,6 +102,7 @@ public class MineFieldReaderTest {
         );
     }
 
+    /** Verifies rejection of dimensions outside the permitted range. */
     private static void testInvalidDimensions() {
         expectException(
             IllegalStateException.class,
@@ -130,6 +141,7 @@ public class MineFieldReaderTest {
         );
     }
 
+    /** Verifies rejection of a row whose width does not match its header. */
     private static void testIncorrectRowLength() {
         String input =
             "2 3\n"
@@ -144,6 +156,7 @@ public class MineFieldReaderTest {
         );
     }
 
+    /** Verifies rejection of input that ends before all rows are read. */
     private static void testMissingRows() {
         String input =
             "2 3\n"
@@ -156,6 +169,7 @@ public class MineFieldReaderTest {
         );
     }
 
+    /** Verifies rejection of unsupported field characters. */
     private static void testInvalidCharacter() {
         String input =
             "1 3\n"
@@ -169,6 +183,12 @@ public class MineFieldReaderTest {
         );
     }
 
+    /**
+     * Parses all minefields in a string.
+     *
+     * @param input encoded minefield input
+     * @return parsed fields
+     */
     private static List<MineField> readFields(String input) {
         try (Scanner scanner = new Scanner(input)) {
             MineFieldReader reader = new MineFieldReader(scanner);
@@ -176,6 +196,12 @@ public class MineFieldReaderTest {
         }
     }
 
+    /**
+     * Checks a parsed field against an expected solution representation.
+     *
+     * @param field parsed field
+     * @param expected rows containing mines and adjacency counts
+     */
     private static void checkField(
             MineField field,
             String[] expected) {
@@ -221,6 +247,12 @@ public class MineFieldReaderTest {
         }
     }
 
+    /**
+     * Fails the test run when a condition is false.
+     *
+     * @param condition condition that must hold
+     * @param message failure message
+     */
     private static void check(
             boolean condition,
             String message) {
@@ -230,6 +262,13 @@ public class MineFieldReaderTest {
         }
     }
 
+    /**
+     * Verifies that an action throws the expected exception type.
+     *
+     * @param expectedType expected exception class
+     * @param action action to execute
+     * @param message failure message
+     */
     private static void expectException(
             Class<? extends Throwable> expectedType,
             Runnable action,

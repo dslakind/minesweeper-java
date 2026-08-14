@@ -4,8 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
+/** Exercises console input handling, formatting, and validation failures. */
 public class MinesweeperApplicationTest {
 
+    /**
+     * Runs all {@link MinesweeperApplication} tests.
+     *
+     * @param args command-line arguments; ignored
+     */
     public static void main(String[] args) {
         testSampleInput();
         testSingleField();
@@ -17,6 +23,7 @@ public class MinesweeperApplicationTest {
         System.out.println("All MinesweeperApplication tests passed.");
     }
 
+    /** Verifies output for the complete sample containing two fields. */
     private static void testSampleInput() {
         String input =
             "4 4\n"
@@ -51,6 +58,7 @@ public class MinesweeperApplicationTest {
         );
     }
 
+    /** Verifies formatting of a single field without an extra blank line. */
     private static void testSingleField() {
         String input =
             "1 1\n"
@@ -75,6 +83,7 @@ public class MinesweeperApplicationTest {
         );
     }
 
+    /** Verifies that an immediate terminator produces no output. */
     private static void testImmediateTerminator() {
         String actual = runApplication("0 0");
 
@@ -85,6 +94,7 @@ public class MinesweeperApplicationTest {
         );
     }
 
+    /** Verifies rejection of a null input scanner. */
     private static void testNullSource() {
         ByteArrayOutputStream capturedOutput =
             new ByteArrayOutputStream();
@@ -101,6 +111,7 @@ public class MinesweeperApplicationTest {
         }
     }
 
+    /** Verifies rejection of a null output stream. */
     private static void testNullOutput() {
         try (Scanner source = new Scanner("0 0")) {
             MinesweeperApplication application =
@@ -114,6 +125,7 @@ public class MinesweeperApplicationTest {
         }
     }
 
+    /** Verifies propagation of malformed-field errors. */
     private static void testMalformedField() {
         String input =
             "2 3\n"
@@ -128,6 +140,12 @@ public class MinesweeperApplicationTest {
         );
     }
 
+    /**
+     * Runs the console application with string-backed input and captures output.
+     *
+     * @param input encoded application input
+     * @return text written by the application
+     */
     private static String runApplication(String input) {
         ByteArrayOutputStream capturedOutput =
             new ByteArrayOutputStream();
@@ -146,6 +164,12 @@ public class MinesweeperApplicationTest {
         }
     }
 
+    /**
+     * Fails the test run when a condition is false.
+     *
+     * @param condition condition that must hold
+     * @param message failure message
+     */
     private static void check(
             boolean condition,
             String message) {
@@ -155,6 +179,13 @@ public class MinesweeperApplicationTest {
         }
     }
 
+    /**
+     * Checks two strings for exact equality.
+     *
+     * @param expected expected text
+     * @param actual actual text
+     * @param message failure message
+     */
     private static void checkEquals(
             String expected,
             String actual,
@@ -171,6 +202,12 @@ public class MinesweeperApplicationTest {
         }
     }
 
+    /**
+     * Makes spaces and line endings visible in assertion messages.
+     *
+     * @param text text to annotate
+     * @return text with visible whitespace markers
+     */
     private static String showWhitespace(String text) {
         return text
             .replace(" ", "·")
@@ -178,6 +215,13 @@ public class MinesweeperApplicationTest {
             .replace("\n", "\\n\n");
     }
 
+    /**
+     * Verifies that an action throws the expected exception type.
+     *
+     * @param expectedType expected exception class
+     * @param action action to execute
+     * @param message failure message
+     */
     private static void expectException(
             Class<? extends Throwable> expectedType,
             Runnable action,
