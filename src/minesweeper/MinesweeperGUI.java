@@ -1,0 +1,314 @@
+package minesweeper;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Insets;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
+public class MinesweeperGUI extends JFrame{
+    // instance variables
+    private Game currentGame;
+    private final MineFieldGenerator fieldGenerator;
+    private final JPanel boardPanel;
+    private final JLabel gameStatusLabel;
+    private JButton[][] squareButtons;
+
+    // constants
+    private static final int ROWS = 9;
+    private static final int COLUMNS = 9;
+    private static final int MINES = 10;
+    private static final int SQUARE_SIZE = 40;
+    private static final String MINE_SYMBOL = "\u2738"; //💣"\uD83D\uDCA3"
+    private static final Color HIDDEN_BACKGROUND =
+        new Color(190, 190, 190);
+
+    private static final Color REVEALED_BACKGROUND =
+        new Color(225, 225, 225);
+
+    private static final Color FLAG_COLOR =
+        new Color(180, 0, 0);
+
+    private static final Color EXPLODED_MINE_BACKGROUND =
+        new Color(220, 60, 60);
+
+    // private static final Color OTHER_MINE_BACKGROUND =
+    //     new Color(80, 80, 80); 
+        
+    private static final Color IN_PROGRESS_COLOR =
+        new Color(70, 70, 70);
+
+    private static final Color WON_COLOR =
+        new Color(0, 130, 0);
+
+    private static final Color LOST_COLOR =
+        new Color(180, 0, 0);
+
+    private static final Font NUMBER_FONT =
+        new Font(Font.SANS_SERIF, Font.BOLD, 18);
+
+    private static final Font BOMB_FONT =
+        new Font("Segoe UI Emoji", Font.PLAIN, 20);
+
+    /** Builds the window and initial game */
+    public MinesweeperGUI() {
+        
+        fieldGenerator = new MineFieldGenerator();
+        currentGame = new Game(fieldGenerator.generate(ROWS, COLUMNS, MINES));
+
+        setTitle("Minesweeper");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(5, 5));
+        
+        gameStatusLabel = new JLabel("Game in progress.");
+        gameStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gameStatusLabel.setFont(
+            new Font(Font.SANS_SERIF, Font.BOLD, 16)
+        );
+        gameStatusLabel.setBorder(
+            BorderFactory.createEmptyBorder(6, 6, 6, 6)
+        );
+
+        boardPanel = new JPanel();
+        
+        JButton newGameButton = new JButton("New Game");
+        newGameButton.setFont(
+            new Font(Font.SANS_SERIF, Font.BOLD, 14)
+        );
+        newGameButton.setMargin(new Insets(6, 12, 6, 12));
+        newGameButton.setFocusPainted(false);
+        newGameButton.addActionListener(
+            event -> startNewGame()
+        );        
+ 
+        add(gameStatusLabel, BorderLayout.NORTH);
+        add(boardPanel, BorderLayout.CENTER);
+        add(newGameButton, BorderLayout.SOUTH);
+
+        buildBoard(); // add the field buttons to the window
+        pack(); // size window to the contents
+        setResizable(false);
+        setLocationRelativeTo(null); // center on screen
+    }
+
+    /** Creates and arranges the square buttons */
+    private void buildBoard() {
+        boardPanel.removeAll(); // Remove any existing controls from boardPanel.
+
+        boardPanel.setLayout(
+            new GridLayout(
+                currentGame.numRows(), 
+                currentGame.numCols(), 
+                1, 
+                1
+            )
+        ); // Give boardPanel a GridLayout.
+
+        boardPanel.setPreferredSize(
+            new Dimension(
+                currentGame.numCols() * SQUARE_SIZE,
+                currentGame.numRows() * SQUARE_SIZE
+            )
+        );
+
+        // Create the JButton[][].
+        squareButtons = new JButton[currentGame.numRows()][currentGame.numCols()];
+
+        /*  Create one button per game square.
+            Store each button in the array.
+            Set button dimensions. 
+            Add each button to boardPanel.
+        */
+        for (int r = 0; r < currentGame.numRows(); r++) {
+            for (int c = 0; c < currentGame.numCols(); c++) {
+                JButton squareButton = new JButton();
+                squareButton.setMargin(new Insets(0, 0, 0, 0));
+                squareButton.setFont(
+                    new Font(Font.SANS_SERIF, Font.BOLD, 18)
+                );
+                squareButton.setFocusable(false);
+                squareButton.setOpaque(true);
+                squareButton.setContentAreaFilled(true);
+
+                int buttonRow = r;
+                int buttonCol = c;
+
+                squareButton.addActionListener(
+                    event -> handleLeftClick(buttonRow, buttonCol)
+                );
+
+                squareButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent event) {
+                        if (SwingUtilities.isRightMouseButton(event)) {
+                            handleRightClick(buttonRow, buttonCol);
+                        }
+                    }
+                });
+
+                squareButtons[r][c] = squareButton;
+                boardPanel.add(squareButton);
+            }
+        }
+
+        refreshView();
+    }
+
+    /** refreshView() Updates buttons and status from the model */
+    private void refreshView() {
+        // get the Square state and set the button text for each button
+        for (int r = 0; r < currentGame.numRows(); r++) {
+            for (int c = 0; c < currentGame.numCols(); c++) {
+                Square square = currentGame.getSquare(r, c);
+                SquareState squareState = square.getState();
+                JButton button = squareButtons[r][c];
+                button.setFont(NUMBER_FONT);
+                button.setText("");
+                button.setForeground(Color.BLACK);
+                button.setBackground(HIDDEN_BACKGROUND);
+                button.setBorderPainted(true);
+                button.setEnabled(true);
+
+                if (squareState == SquareState.FLAGGED) {
+                    button.setText("⚑");
+                    button.setForeground(FLAG_COLOR);
+                    button.setBackground(HIDDEN_BACKGROUND);
+                    button.setBorderPainted(true);
+                    button.setEnabled(true);
+                } else if (squareState == SquareState.HIDDEN) {
+                    button.setText("");
+                    button.setEnabled(true);
+                } else if (
+                    squareState == SquareState.REVEALED 
+                    && square.hasMine()
+                ) {
+                    button.setFont(BOMB_FONT);
+                    button.setText(MINE_SYMBOL);
+                    button.setForeground(Color.BLACK);
+                    button.setBackground(EXPLODED_MINE_BACKGROUND);
+                    button.setBorderPainted(false);                    
+                    // button.setEnabled(false);
+                    button.setBorderPainted(false);
+                } else if (
+                    squareState == SquareState.REVEALED 
+                    && square.getAdjacentMineCount() == 0
+                ) {
+                    button.setText("");
+                    button.setBackground(REVEALED_BACKGROUND);
+                    button.setBorderPainted(false);     
+                    // button.setEnabled(false);
+                    button.setBorderPainted(false);
+                } else {
+                    int count = square.getAdjacentMineCount();
+
+                    button.setText(Integer.toString(count));
+                    button.setForeground(getNumberColor(count));
+                    button.setBackground(REVEALED_BACKGROUND);
+                    button.setBorderPainted(false);                    
+                    // button.setEnabled(false);
+                    button.setBorderPainted(false);
+                }
+            }  
+        }
+
+        // If the game is over, disable every square button.
+        if (currentGame.getStatus() != GameStatus.IN_PROGRESS) {
+            gameOver();
+        }            
+        
+        // After updating the buttons, update gameStatusLabel:
+        updateGameStatusLabel();
+    }
+
+    private void gameOver() {
+        GameStatus gameStatus = currentGame.getStatus() ;
+        // disable every square button.
+        if (gameStatus != GameStatus.IN_PROGRESS) {
+            for (int r = 0; r < currentGame.numRows(); r++) {
+                for (int c = 0; c < currentGame.numCols(); c++) {
+                    // squareButtons[r][c].setEnabled(false);
+                    squareButtons[r][c].setBorderPainted(false);
+
+                    if (
+                        gameStatus == GameStatus.LOST
+                        && currentGame.getSquare(r, c).hasMine()
+                    ) {
+                        squareButtons[r][c].setText(MINE_SYMBOL);
+                    }
+                }
+            }
+        }
+    }
+
+    /** handleLeftClick(row, col)	Reveals a square */
+    private void handleLeftClick(int row, int col) {
+        currentGame.revealSquare(row, col);
+        refreshView();
+    }
+    
+    /** handleRightClick(row, col)	Toggles a flag  */
+    private void handleRightClick(int row, int col) {
+        currentGame.toggleFlag(row, col);
+        refreshView();
+    }
+
+    /** startNewGame()	Generates and installs a new game */
+    private void startNewGame() {
+        currentGame = new Game(fieldGenerator.generate(ROWS, COLUMNS, MINES));
+
+        buildBoard();
+        boardPanel.revalidate();
+        boardPanel.repaint();
+
+        pack();
+    }
+
+    private Color getNumberColor(int count) {
+        switch (count) {
+            case 1:
+                return new Color(0, 0, 200);
+            case 2:
+                return new Color(0, 125, 0);
+            case 3:
+                return new Color(200, 0, 0);
+            case 4:
+                return new Color(0, 0, 110);
+            case 5:
+                return new Color(125, 0, 0);
+            case 6:
+                return new Color(0, 125, 125);
+            case 7:
+                return Color.BLACK;
+            case 8:
+                return Color.DARK_GRAY;
+            default:
+                return Color.BLACK;
+        }
+    }    
+
+    private void updateGameStatusLabel() {
+        GameStatus gameStatus = currentGame.getStatus();
+
+        if (gameStatus == GameStatus.IN_PROGRESS) {
+            gameStatusLabel.setText("Game in progress.");
+            gameStatusLabel.setForeground(IN_PROGRESS_COLOR);
+        } else if (gameStatus == GameStatus.WON) {
+            gameStatusLabel.setText("You won!");
+            gameStatusLabel.setForeground(WON_COLOR);
+        } else {
+            gameStatusLabel.setText("Game over.");
+            gameStatusLabel.setForeground(LOST_COLOR);
+        }
+    }
+}
