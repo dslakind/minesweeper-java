@@ -20,7 +20,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 /**
- * Swing window for playing a standard3e Minesweeper game.
+ * Swing window for playing a standard Minesweeper game.
  * Left-clicking reveals squares, right-clicking toggles flags, and the new-game
  * button creates a fresh randomized board.
  */
@@ -34,8 +34,11 @@ public class MinesweeperGUI extends JFrame {
     private final MineFieldGenerator fieldGenerator;
     /** Container that arranges the square buttons. */
     private final JPanel boardPanel;
+    /** Container for the boardPanel and Square buttons */
+    private final JPanel boardContainer;
     /** Label displaying whether the game is active, won, or lost. */
     private final JLabel gameStatusLabel;
+    private final JLabel remainingMineLabel;
     /** Buttons indexed by their corresponding field coordinates. */
     private JButton[][] squareButtons;
     private JComboBox<Difficulty> difficultyJComboBox;
@@ -87,6 +90,10 @@ public class MinesweeperGUI extends JFrame {
         
         gameStatusLabel = new JLabel("Game in progress.");
         gameStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        remainingMineLabel = new JLabel("Mines remaining: " + currentGame.numRemainingMines());
+        remainingMineLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
         JPanel headerPanel = new JPanel();
         headerPanel.setLayout(new BorderLayout()); 
         
@@ -98,6 +105,7 @@ public class MinesweeperGUI extends JFrame {
         difficultyJPanel.add(difficultyLabel);
         difficultyJPanel.add(difficultyJComboBox);
         headerPanel.add(gameStatusLabel, BorderLayout.CENTER);
+        headerPanel.add(remainingMineLabel, BorderLayout.WEST);
         headerPanel.add(difficultyJPanel, BorderLayout.EAST);
         
         gameStatusLabel.setFont(
@@ -106,6 +114,16 @@ public class MinesweeperGUI extends JFrame {
         gameStatusLabel.setBorder(
             BorderFactory.createEmptyBorder(6, 6, 6, 6)
         );
+
+        remainingMineLabel.setFont(
+            new Font(Font.SANS_SERIF, Font.BOLD, 16)
+        );
+        remainingMineLabel.setBorder(
+            BorderFactory.createEmptyBorder(6, 6, 6, 6)
+        );
+
+        boardContainer = new JPanel();
+        boardContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 
         boardPanel = new JPanel();
         
@@ -128,7 +146,8 @@ public class MinesweeperGUI extends JFrame {
         });
  
         add(headerPanel, BorderLayout.NORTH);
-        add(boardPanel, BorderLayout.CENTER);
+        add(boardContainer, BorderLayout.CENTER);
+        boardContainer.add(boardPanel);
         add(newGameButton, BorderLayout.SOUTH);
 
 
@@ -265,6 +284,7 @@ public class MinesweeperGUI extends JFrame {
         
         // After updating the buttons, update gameStatusLabel:
         updateGameStatusLabel();
+        updateRemainingMineLabel();
     }
 
     /** Displays all mines and removes button borders when the game has ended. */
@@ -368,5 +388,9 @@ public class MinesweeperGUI extends JFrame {
             gameStatusLabel.setText("Game over.");
             gameStatusLabel.setForeground(LOST_COLOR);
         }
+    }
+
+    private void updateRemainingMineLabel() {
+        remainingMineLabel.setText("Mines remaining: " + currentGame.numRemainingMines());
     }
 }
