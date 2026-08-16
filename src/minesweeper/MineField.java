@@ -4,8 +4,6 @@ import java.util.Objects;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import javax.swing.text.Position;
-
 /**
  * Represents a rectangular Minesweeper field and its mine-adjacency data.
  */
