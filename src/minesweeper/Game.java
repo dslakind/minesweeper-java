@@ -108,4 +108,9 @@ public class Game {
     public Square getSquare(int row, int col) {
         return field.getSquare(row, col);
     }
+
+    /** @return the number of remaining mines  */
+    public int numRemainingMines() {
+        return field.numMines() - field.numFlags();
+    }
 }

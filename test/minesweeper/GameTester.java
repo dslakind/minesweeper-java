@@ -1,5 +1,7 @@
 package minesweeper;
 
+import java.util.Random;
+
 /** Exercises game actions, state transitions, and coordinate validation. */
 public class GameTester {
 
@@ -15,6 +17,14 @@ public class GameTester {
         testFinalSafeSquareWinsGame();
         testMineRevealLosesGame();
         testFlaggingAndUnflagging();
+
+        testInitialRemainingMineCount();
+        testInitialRemainingMineCountForEveryDifficulty();
+        testFlagChangesRemainingMineCount();
+        testIncorrectFlagChangesRemainingMineCount();
+        testRemainingMineCountCanBecomeNegative();
+        testFreshGameResetsRemainingMineCount();
+
         testFlaggedSquareCannotBeRevealed();
         testRevealedSquareCannotBeFlagged();
         testActionsAfterWinDoNothing();
@@ -236,6 +246,143 @@ public class GameTester {
         );
     }
 
+    /** Verifies that a new game reports its complete mine count. */
+    private static void testInitialRemainingMineCount() {
+        Game game = createTwoMineGame();
+
+        check(
+            game.numRemainingMines() == 2,
+            "A new two-mine game should report 2 remaining mines"
+        );
+    }
+
+    /** Verifies the initial counter for every selectable difficulty. */
+    private static void testInitialRemainingMineCountForEveryDifficulty() {
+        verifyInitialRemainingMineCount(
+            Difficulty.BEGINNER,
+            10,
+            900L
+        );
+        verifyInitialRemainingMineCount(
+            Difficulty.INTERMEDIATE,
+            40,
+            1000L
+        );
+        verifyInitialRemainingMineCount(
+            Difficulty.EXPERT,
+            99,
+            1100L
+        );
+    }
+
+    /**
+     * Verifies the initial counter for one generated difficulty.
+     *
+     * @param difficulty difficulty to generate
+     * @param expectedMineCount literal expected mine count
+     * @param seed seed used for repeatable generation
+     */
+    private static void verifyInitialRemainingMineCount(
+        Difficulty difficulty,
+        int expectedMineCount,
+        long seed
+    ) {
+        MineFieldGenerator generator =
+            new MineFieldGenerator(new Random(seed));
+
+        Game game = new Game(generator.generate(difficulty));
+
+        check(
+            game.numRemainingMines() == expectedMineCount,
+            difficulty + " should initially report "
+                + expectedMineCount + " remaining mines, but reported "
+                + game.numRemainingMines()
+        );
+    }
+
+    /** Verifies that flagging and unflagging change the remaining count. */
+    private static void testFlagChangesRemainingMineCount() {
+        Game game = createTwoMineGame();
+
+        game.toggleFlag(0, 1);
+
+        check(
+            game.numRemainingMines() == 1,
+            "Placing one flag should reduce the remaining count to 1"
+        );
+
+        game.toggleFlag(0, 1);
+
+        check(
+            game.numRemainingMines() == 2,
+            "Removing the flag should restore the remaining count to 2"
+        );
+    }
+
+    /** Verifies that an incorrectly placed flag still affects the count. */
+    private static void testIncorrectFlagChangesRemainingMineCount() {
+        Game game = createTwoMineGame();
+
+        check(
+            !game.getSquare(1, 1).hasMine(),
+            "Test setup requires (1, 1) to be a safe square"
+        );
+
+        game.toggleFlag(1, 1);
+
+        checkState(
+            game,
+            1,
+            1,
+            SquareState.FLAGGED,
+            "The safe square should be flagged"
+        );
+        check(
+            game.numRemainingMines() == 1,
+            "A flag on a safe square should still reduce the remaining count"
+        );
+    }
+
+    /** Verifies that excess flags can produce a negative count. */
+    private static void testRemainingMineCountCanBecomeNegative() {
+        Game game = createTwoMineGame();
+
+        game.toggleFlag(0, 1);
+        game.toggleFlag(0, 2);
+
+        check(
+            game.numRemainingMines() == 0,
+            "Two flags on a two-mine field should produce a count of 0"
+        );
+
+        game.toggleFlag(1, 0);
+
+        check(
+            game.numRemainingMines() == -1,
+            "Three flags on a two-mine field should produce a count of -1"
+        );
+    }
+
+    /** Verifies that a fresh game starts with a reset counter. */
+    private static void testFreshGameResetsRemainingMineCount() {
+        Game firstGame = createTwoMineGame();
+
+        firstGame.toggleFlag(0, 1);
+        firstGame.toggleFlag(0, 2);
+
+        check(
+            firstGame.numRemainingMines() == 0,
+            "Test setup should reduce the first game's count to 0"
+        );
+
+        Game newGame = createTwoMineGame();
+
+        check(
+            newGame.numRemainingMines() == 2,
+            "A fresh game should reset the remaining count to 2"
+        );
+    }
+
     /** Verifies that a flagged square cannot be revealed. */
     private static void testFlaggedSquareCannotBeRevealed() {
         Game game = new Game(
@@ -415,6 +562,19 @@ public class GameTester {
             IndexOutOfBoundsException.class,
             () -> game.toggleFlag(-1, 0),
             "toggleFlag should still validate coordinates after game over"
+        );
+    }
+
+    /** Creates a fresh game containing exactly two mines. */
+    private static Game createTwoMineGame() {
+        return new Game(
+            new MineField(
+                new String[]{
+                    "*..",
+                    "...",
+                    "..*"
+                }
+            )
         );
     }
 

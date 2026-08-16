@@ -4,6 +4,8 @@ import java.util.Objects;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import javax.swing.text.Position;
+
 /**
  * Represents a rectangular Minesweeper field and its mine-adjacency data.
  */
@@ -240,6 +242,32 @@ public class MineField {
         squares[row][col].setAdjacentMineCount(result);
     }
 
+    /** counts squares containing mines */
+    public int numMines() {
+        int mines = 0;
+        for (int row = 0; row < numRows(); row++) {
+            for (int col = 0; col < numCols(); col++) {
+                if (getSquare(row, col).hasMine()) {
+                    mines++;
+                }
+            }
+        }
+
+        return mines;
+    }
+
+    public int numFlags() {
+        int flags = 0;
+        for (int row = 0; row < numRows(); row++) {
+            for (int col = 0; col < numCols(); col++) {
+                if (getSquare(row, col).getState() == SquareState.FLAGGED) {
+                    flags++;
+                }
+            }
+        }
+
+        return flags;
+    }
 
     /** Immutable row and column used by the region-reveal traversal. */
     private static class Position {
