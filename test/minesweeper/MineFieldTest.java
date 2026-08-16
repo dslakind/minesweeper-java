@@ -1,32 +1,18 @@
 package minesweeper;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 
 /** Exercises minefield construction, validation, and region-reveal behavior. */
-public class MineFieldTester {
+public class MineFieldTest {
 
-    /**
-     * Runs all {@link MineField} tests.
-     *
-     * @param args command-line arguments; ignored
-     */
-    public static void main(String[] args) {
-        testConstructionAndMineCounts();
-        testCoordinateValidation();
-        testNumberedSquareReveal();
-        testZeroRegionReveal();
-        testDisconnectedRegionRemainsHidden();
-        testMineIsNotRevealed();
-        testFlaggedSquareIsNotRevealed();
-        testRepeatedReveal();
-        testLargeEmptyRegion();
-        testConstructorValidation();
-
-        System.out.println("All MineField tests passed.");
-    }
 
     /** Verifies field dimensions, square states, and adjacent-mine counts. */
-    private static void testConstructionAndMineCounts() {
+    @Test
+    void testConstructionAndMineCounts() {
         String[] rows = {
             "*...",
             "....",
@@ -36,8 +22,8 @@ public class MineFieldTester {
 
         MineField field = new MineField(rows);
 
-        check(field.numRows() == 4, "Expected 4 rows");
-        check(field.numCols() == 4, "Expected 4 columns");
+        assertTrue(field.numRows() == 4, "Expected 4 rows");
+        assertTrue(field.numCols() == 4, "Expected 4 columns");
 
         String[] expected = {
             "*100",
@@ -51,19 +37,19 @@ public class MineFieldTester {
                 Square square = field.getSquare(row, col);
                 char expectedValue = expected[row].charAt(col);
 
-                check(
+                assertTrue(
                     square.getState() == SquareState.HIDDEN,
                     "New square should be hidden at ("
                         + row + ", " + col + ")"
                 );
 
                 if (expectedValue == '*') {
-                    check(
+                    assertTrue(
                         square.hasMine(),
                         "Expected mine at (" + row + ", " + col + ")"
                     );
                 } else {
-                    check(
+                    assertTrue(
                         !square.hasMine(),
                         "Expected safe square at ("
                             + row + ", " + col + ")"
@@ -72,7 +58,7 @@ public class MineFieldTester {
                     int expectedCount =
                         Character.getNumericValue(expectedValue);
 
-                    check(
+                    assertTrue(
                         square.getAdjacentMineCount() == expectedCount,
                         "Incorrect count at (" + row + ", " + col
                             + "): expected " + expectedCount
@@ -83,14 +69,15 @@ public class MineFieldTester {
             }
         }
 
-        check(
+        assertTrue(
             !field.allSafeSquaresRevealed(),
             "New field should not report all safe squares revealed"
         );
     }
 
     /** Verifies valid-coordinate detection and invalid-coordinate exceptions. */
-    private static void testCoordinateValidation() {
+    @Test
+    void testCoordinateValidation() {
         MineField field = new MineField(
             new String[]{
                 "..",
@@ -98,38 +85,38 @@ public class MineFieldTester {
             }
         );
 
-        check(field.isValidSquare(0, 0), "(0, 0) should be valid");
-        check(field.isValidSquare(1, 1), "(1, 1) should be valid");
-        check(!field.isValidSquare(-1, 0), "Negative row should be invalid");
-        check(!field.isValidSquare(0, -1), "Negative column should be invalid");
-        check(!field.isValidSquare(2, 0), "Row 2 should be invalid");
-        check(!field.isValidSquare(0, 2), "Column 2 should be invalid");
+        assertTrue(field.isValidSquare(0, 0), "(0, 0) should be valid");
+        assertTrue(field.isValidSquare(1, 1), "(1, 1) should be valid");
+        assertTrue(!field.isValidSquare(-1, 0), "Negative row should be invalid");
+        assertTrue(!field.isValidSquare(0, -1), "Negative column should be invalid");
+        assertTrue(!field.isValidSquare(2, 0), "Row 2 should be invalid");
+        assertTrue(!field.isValidSquare(0, 2), "Column 2 should be invalid");
 
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> field.getSquare(-1, 0),
             "getSquare should reject an invalid position"
         );
 
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> field.revealRegion(-1, 0),
             "revealRegion should reject a negative row"
         );
 
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> field.revealRegion(0, -1),
             "revealRegion should reject a negative column"
         );
 
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> field.revealRegion(2, 0),
             "revealRegion should reject a row beyond the field"
         );
 
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> field.revealRegion(0, 2),
             "revealRegion should reject a column beyond the field"
@@ -137,7 +124,8 @@ public class MineFieldTester {
     }
 
     /** Verifies that revealing a numbered square does not reveal neighbors. */
-    private static void testNumberedSquareReveal() {
+    @Test
+    void testNumberedSquareReveal() {
         MineField field = new MineField(
             new String[]{
                 "*..",
@@ -146,7 +134,7 @@ public class MineFieldTester {
             }
         );
 
-        check(
+        assertTrue(
             field.getSquare(0, 1).getAdjacentMineCount() == 1,
             "Starting square should be numbered"
         );
@@ -175,14 +163,15 @@ public class MineFieldTester {
             }
         }
 
-        check(
+        assertTrue(
             !field.allSafeSquaresRevealed(),
             "Revealing one numbered square should not complete this field"
         );
     }
 
     /** Verifies expansion through a connected region of zero-count squares. */
-    private static void testZeroRegionReveal() {
+    @Test
+    void testZeroRegionReveal() {
         MineField field = new MineField(
             new String[]{
                 "*...",
@@ -192,7 +181,7 @@ public class MineFieldTester {
             }
         );
 
-        check(
+        assertTrue(
             field.getSquare(3, 3).getAdjacentMineCount() == 0,
             "Starting square should have zero adjacent mines"
         );
@@ -204,12 +193,12 @@ public class MineFieldTester {
                 Square square = field.getSquare(row, col);
 
                 if (square.hasMine()) {
-                    check(
+                    assertTrue(
                         square.getState() == SquareState.HIDDEN,
                         "Region reveal must not reveal a mine"
                     );
                 } else {
-                    check(
+                    assertTrue(
                         square.getState() == SquareState.REVEALED,
                         "Safe square should be revealed at ("
                             + row + ", " + col + ")"
@@ -242,14 +231,15 @@ public class MineFieldTester {
             "Diagonal numbered boundary should be revealed"
         );
 
-        check(
+        assertTrue(
             field.allSafeSquaresRevealed(),
             "Region reveal should reveal every safe square in this field"
         );
     }
 
     /** Verifies that a mine barrier prevents expansion into another region. */
-    private static void testDisconnectedRegionRemainsHidden() {
+    @Test
+    void testDisconnectedRegionRemainsHidden() {
         MineField field = new MineField(
             new String[]{
                 ".....",
@@ -299,14 +289,15 @@ public class MineFieldTester {
             }
         }
 
-        check(
+        assertTrue(
             !field.allSafeSquaresRevealed(),
             "Hidden disconnected safe region should prevent completion"
         );
     }
 
     /** Verifies that region reveal does not reveal a selected mine. */
-    private static void testMineIsNotRevealed() {
+    @Test
+    void testMineIsNotRevealed() {
         MineField field = new MineField(
             new String[]{
                 "*.",
@@ -334,7 +325,8 @@ public class MineFieldTester {
     }
 
     /** Verifies that region reveal preserves flagged squares. */
-    private static void testFlaggedSquareIsNotRevealed() {
+    @Test
+    void testFlaggedSquareIsNotRevealed() {
         MineField field = new MineField(
             new String[]{
                 "...",
@@ -378,7 +370,7 @@ public class MineFieldTester {
             }
         }
 
-        check(
+        assertTrue(
             !field.allSafeSquaresRevealed(),
             "Flagged safe square should prevent completion"
         );
@@ -394,14 +386,15 @@ public class MineFieldTester {
             "Square should be revealable after removing its flag"
         );
 
-        check(
+        assertTrue(
             field.allSafeSquaresRevealed(),
             "All safe squares should be revealed after removing the flag"
         );
     }
 
     /** Verifies that revealing an already revealed region is harmless. */
-    private static void testRepeatedReveal() {
+    @Test
+    void testRepeatedReveal() {
         MineField field = new MineField(
             new String[]{
                 "*..",
@@ -431,7 +424,8 @@ public class MineFieldTester {
     }
 
     /** Verifies iterative expansion across a large empty field. */
-    private static void testLargeEmptyRegion() {
+    @Test
+    void testLargeEmptyRegion() {
         int size = 100;
         String[] rows = new String[size];
 
@@ -456,51 +450,52 @@ public class MineFieldTester {
             }
         }
 
-        check(
+        assertTrue(
             field.allSafeSquaresRevealed(),
             "Large empty field should be completed by one reveal"
         );
     }
 
     /** Verifies rejection of null, empty, irregular, and invalid field data. */
-    private static void testConstructorValidation() {
-        expectException(
+    @Test
+    void testConstructorValidation() {
+        assertThrows(
             NullPointerException.class,
             () -> new MineField((String[]) null),
             "Constructor should reject null"
         );
 
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> new MineField(new String[0]),
             "Constructor should reject an empty array"
         );
 
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> new MineField(new String[]{""}),
             "Constructor should reject empty rows"
         );
 
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> new MineField(new String[]{"...", ".."}),
             "Constructor should reject nonrectangular fields"
         );
 
-        expectException(
+        assertThrows(
             NullPointerException.class,
             () -> new MineField(new String[]{null}),
             "Constructor should reject a null first row"
         );
 
-        expectException(
+        assertThrows(
             NullPointerException.class,
             () -> new MineField(new String[]{"...", null}),
             "Constructor should reject subsequent null rows"
         );
 
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> new MineField(new String[]{"..X", "..."}),
             "Constructor should reject invalid characters"
@@ -525,56 +520,11 @@ public class MineFieldTester {
     ) {
         SquareState actualState = field.getSquare(row, col).getState();
 
-        check(
+        assertTrue(
             actualState == expectedState,
             message + " at (" + row + ", " + col + ")"
                 + "; expected " + expectedState
                 + " but found " + actualState
-        );
-    }
-
-    /**
-     * Fails the test run when a condition is false.
-     *
-     * @param condition condition that must hold
-     * @param message failure message
-     */
-    private static void check(boolean condition, String message) {
-        if (!condition) {
-            throw new AssertionError(message);
-        }
-    }
-
-    /**
-     * Verifies that an action throws the expected exception type.
-     *
-     * @param expectedType expected exception class
-     * @param action action to execute
-     * @param message failure message
-     */
-    private static void expectException(
-        Class<? extends Throwable> expectedType,
-        Runnable action,
-        String message
-    ) {
-        try {
-            action.run();
-        } catch (Throwable exception) {
-            if (expectedType.isInstance(exception)) {
-                return;
-            }
-
-            throw new AssertionError(
-                message + "; expected "
-                    + expectedType.getSimpleName()
-                    + " but received "
-                    + exception.getClass().getSimpleName(),
-                exception
-            );
-        }
-
-        throw new AssertionError(
-            message + "; expected " + expectedType.getSimpleName()
         );
     }
 }

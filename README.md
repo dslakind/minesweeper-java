@@ -5,7 +5,7 @@ An object-oriented Java implementation of Minesweeper with two application modes
 * A command-line solver for the classic programming challenge.
 * An interactive Swing game with random minefields, selectable difficulties, region revealing, flags, a remaining-mine counter, an elapsed timer, and win/loss detection.
 
-The application uses only the Java standard library. It includes standalone tester classes that do not require JUnit.
+The application uses the Java standard library, with JUnit 5 used for automated tests.
 
 ## Current functionality
 
@@ -183,26 +183,26 @@ The launcher creates the GUI on Swing’s Event Dispatch Thread. The selected di
 
 ## Run the tests
 
-Run all standalone tester classes with one command:
+Run all JUnit 5 tests with one command:
 
 ```bash
 ./gradlew check
 ```
 
-A complete build also runs all testers:
+A complete build also runs the test suite:
 
 ```bash
 ./gradlew build
 ```
 
-An individual tester can be run through its corresponding Gradle task. For example:
+An individual test class can be run with Gradle's test filter. For example:
 
 ```bash
-./gradlew runGameTester
-./gradlew runMineFieldTester
+./gradlew test --tests minesweeper.GameTest
+./gradlew test --tests minesweeper.MineFieldTest
 ```
 
-Each tester throws an `AssertionError` when a check fails and prints a success message when all checks pass. The Gradle build fails if any tester exits unsuccessfully.
+Each scenario is reported as a separate JUnit test. The Gradle build fails if any test fails.
 
 The tests cover:
 
@@ -267,7 +267,6 @@ When several fields are processed, one empty line appears between their outputs.
 * Highlight the selected mine and incorrect flags after a loss.
 * Preserve square proportions when resizing the window.
 * Add keyboard accessibility and clearer focus behavior.
-* Migrate the standalone tester classes to a standard testing framework such as JUnit.
 * Add automated tests for GUI-independent presentation decisions where practical.
 
 Challenge-output formatting remains separate from the interactive display. `SolutionFormatter` always shows the complete solved field, while `MinesweeperGUI` respects each square’s state and the current `GameStatus`.

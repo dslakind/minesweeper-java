@@ -1,36 +1,18 @@
 package minesweeper;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Random;
 
 /** Exercises randomized minefield generation and input validation. */
-public class MineFieldGeneratorTester {
+public class MineFieldGeneratorTest {
 
-    /**
-     * Runs all {@link MineFieldGenerator} tests.
-     *
-     * @param args command-line arguments; ignored
-     */
-    public static void main(String[] args) {
-        testOrdinarySquareField();
-        testWideRectangularField();
-        testTallRectangularField();
-        testSingleSquareField();
-        testZeroMines();
-        testMaximumLegalMineCount();
-        testRepeatabilityWithFixedSeed();
-        testBeginnerConfiguration();
-        testIntermediateConfiguration();
-        testExpertConfiguration();
-        testNullDifficulty();
-        testNullRandom();
-        testInvalidDimensions();
-        testInvalidMineCounts();
-
-        System.out.println("All MineFieldGenerator tests passed.");
-    }
 
     /** Verifies generation of a typical square field. */
-    private static void testOrdinarySquareField() {
+    @Test
+    void testOrdinarySquareField() {
         MineFieldGenerator generator = new MineFieldGenerator();
         MineField field = generator.generate(8, 8, 10);
 
@@ -38,7 +20,8 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies generation of a field wider than it is tall. */
-    private static void testWideRectangularField() {
+    @Test
+    void testWideRectangularField() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(12345L));
         MineField field = generator.generate(2, 5, 4);
@@ -47,7 +30,8 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies generation of a field taller than it is wide. */
-    private static void testTallRectangularField() {
+    @Test
+    void testTallRectangularField() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(54321L));
         MineField field = generator.generate(5, 2, 4);
@@ -56,7 +40,8 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies the smallest legal field. */
-    private static void testSingleSquareField() {
+    @Test
+    void testSingleSquareField() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(50L));
         MineField field = generator.generate(1, 1, 0);
@@ -65,7 +50,8 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies generation of a mine-free field. */
-    private static void testZeroMines() {
+    @Test
+    void testZeroMines() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(100L));
         MineField field = generator.generate(3, 5, 0);
@@ -76,7 +62,7 @@ public class MineFieldGeneratorTester {
             for (int col = 0; col < field.numCols(); col++) {
                 Square square = field.getSquare(row, col);
 
-                check(
+                assertTrue(
                     square.getAdjacentMineCount() == 0,
                     "A field without mines should contain only zero counts"
                 );
@@ -85,7 +71,8 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies the largest legal mine count for a field. */
-    private static void testMaximumLegalMineCount() {
+    @Test
+    void testMaximumLegalMineCount() {
         int rows = 3;
         int columns = 4;
         int mineCount = rows * columns - 1;
@@ -98,7 +85,8 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies deterministic layouts when generators use the same seed. */
-    private static void testRepeatabilityWithFixedSeed() {
+    @Test
+    void testRepeatabilityWithFixedSeed() {
         long seed = 987654321L;
 
         MineField first = new MineFieldGenerator(new Random(seed))
@@ -106,7 +94,7 @@ public class MineFieldGeneratorTester {
         MineField second = new MineFieldGenerator(new Random(seed))
             .generate(7, 11, 15);
 
-        check(
+        assertTrue(
             layoutsMatch(first, second),
             "Generators using the same seed should create the same layout"
         );
@@ -116,7 +104,8 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies generation using the beginner difficulty settings. */
-    private static void testBeginnerConfiguration() {
+    @Test
+    void testBeginnerConfiguration() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(500L));
         MineField field = generator.generate(Difficulty.BEGINNER);
@@ -125,7 +114,8 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies generation using the intermediate difficulty settings. */
-    private static void testIntermediateConfiguration() {
+    @Test
+    void testIntermediateConfiguration() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(600L));
         MineField field = generator.generate(Difficulty.INTERMEDIATE);
@@ -134,7 +124,8 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies generation using the expert difficulty settings. */
-    private static void testExpertConfiguration() {
+    @Test
+    void testExpertConfiguration() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(700L));
         MineField field = generator.generate(Difficulty.EXPERT);
@@ -143,11 +134,12 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies that the generator rejects a null difficulty. */
-    private static void testNullDifficulty() {
+    @Test
+    void testNullDifficulty() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(800L));
 
-        expectException(
+        assertThrows(
             NullPointerException.class,
             () -> generator.generate((Difficulty) null),
             "Generator should reject a null Difficulty"
@@ -155,8 +147,9 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies that the generator rejects a null random source. */
-    private static void testNullRandom() {
-        expectException(
+    @Test
+    void testNullRandom() {
+        assertThrows(
             NullPointerException.class,
             () -> new MineFieldGenerator(null),
             "Constructor should reject a null Random"
@@ -164,26 +157,27 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies rejection of nonpositive dimensions. */
-    private static void testInvalidDimensions() {
+    @Test
+    void testInvalidDimensions() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(300L));
 
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> generator.generate(0, 5, 0),
             "Generator should reject zero rows"
         );
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> generator.generate(-1, 5, 0),
             "Generator should reject negative rows"
         );
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> generator.generate(5, 0, 0),
             "Generator should reject zero columns"
         );
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> generator.generate(5, -1, 0),
             "Generator should reject negative columns"
@@ -191,21 +185,22 @@ public class MineFieldGeneratorTester {
     }
 
     /** Verifies rejection of mine counts outside the legal range. */
-    private static void testInvalidMineCounts() {
+    @Test
+    void testInvalidMineCounts() {
         MineFieldGenerator generator =
             new MineFieldGenerator(new Random(400L));
 
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> generator.generate(2, 3, -1),
             "Generator should reject a negative mine count"
         );
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> generator.generate(2, 3, 6),
             "Generator should reject one mine for every square"
         );
-        expectException(
+        assertThrows(
             IllegalArgumentException.class,
             () -> generator.generate(2, 3, 7),
             "Generator should reject more mines than squares"
@@ -226,13 +221,13 @@ public class MineFieldGeneratorTester {
         int expectedColumns,
         int expectedMineCount
     ) {
-        check(field != null, "Generator should return a MineField");
-        check(
+        assertTrue(field != null, "Generator should return a MineField");
+        assertTrue(
             field.numRows() == expectedRows,
             "Expected " + expectedRows + " rows but found "
                 + field.numRows()
         );
-        check(
+        assertTrue(
             field.numCols() == expectedColumns,
             "Expected " + expectedColumns + " columns but found "
                 + field.numCols()
@@ -244,7 +239,7 @@ public class MineFieldGeneratorTester {
             for (int col = 0; col < field.numCols(); col++) {
                 Square square = field.getSquare(row, col);
 
-                check(
+                assertTrue(
                     square.getState() == SquareState.HIDDEN,
                     "Generated square should be hidden at ("
                         + row + ", " + col + ")"
@@ -256,7 +251,7 @@ public class MineFieldGeneratorTester {
                     int expectedAdjacentCount =
                         countAdjacentMines(field, row, col);
 
-                    check(
+                    assertTrue(
                         square.getAdjacentMineCount()
                             == expectedAdjacentCount,
                         "Incorrect adjacent-mine count at ("
@@ -268,7 +263,7 @@ public class MineFieldGeneratorTester {
             }
         }
 
-        check(
+        assertTrue(
             actualMineCount == expectedMineCount,
             "Expected " + expectedMineCount + " mines but found "
                 + actualMineCount
@@ -336,50 +331,5 @@ public class MineFieldGeneratorTester {
         }
 
         return true;
-    }
-
-    /**
-     * Fails the test run when a condition is false.
-     *
-     * @param condition condition that must hold
-     * @param message failure message
-     */
-    private static void check(boolean condition, String message) {
-        if (!condition) {
-            throw new AssertionError(message);
-        }
-    }
-
-    /**
-     * Verifies that an action throws the expected exception type.
-     *
-     * @param expectedType expected exception class
-     * @param action action to execute
-     * @param message failure message
-     */
-    private static void expectException(
-        Class<? extends Throwable> expectedType,
-        Runnable action,
-        String message
-    ) {
-        try {
-            action.run();
-        } catch (Throwable exception) {
-            if (expectedType.isInstance(exception)) {
-                return;
-            }
-
-            throw new AssertionError(
-                message + "; expected "
-                    + expectedType.getSimpleName()
-                    + " but received "
-                    + exception.getClass().getSimpleName(),
-                exception
-            );
-        }
-
-        throw new AssertionError(
-            message + "; expected " + expectedType.getSimpleName()
-        );
     }
 }
