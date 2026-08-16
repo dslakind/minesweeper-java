@@ -1,5 +1,10 @@
 package minesweeper;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
@@ -7,24 +12,10 @@ import java.util.Scanner;
 /** Exercises console input handling, formatting, and validation failures. */
 public class MinesweeperApplicationTest {
 
-    /**
-     * Runs all {@link MinesweeperApplication} tests.
-     *
-     * @param args command-line arguments; ignored
-     */
-    public static void main(String[] args) {
-        testSampleInput();
-        testSingleField();
-        testImmediateTerminator();
-        testNullSource();
-        testNullOutput();
-        testMalformedField();
-
-        System.out.println("All MinesweeperApplication tests passed.");
-    }
 
     /** Verifies output for the complete sample containing two fields. */
-    private static void testSampleInput() {
+    @Test
+    void testSampleInput() {
         String input =
             "4 4\n"
             + "*...\n"
@@ -51,7 +42,7 @@ public class MinesweeperApplicationTest {
 
         String actual = runApplication(input);
 
-        checkEquals(
+        assertEquals(
             expected,
             actual,
             "Sample input output is incorrect"
@@ -59,7 +50,8 @@ public class MinesweeperApplicationTest {
     }
 
     /** Verifies formatting of a single field without an extra blank line. */
-    private static void testSingleField() {
+    @Test
+    void testSingleField() {
         String input =
             "1 1\n"
             + ".\n"
@@ -71,23 +63,24 @@ public class MinesweeperApplicationTest {
 
         String actual = runApplication(input);
 
-        checkEquals(
+        assertEquals(
             expected,
             actual,
             "Single-field output is incorrect"
         );
 
-        check(
+        assertTrue(
             !actual.endsWith("\n\n"),
             "A blank line should not follow the final field"
         );
     }
 
     /** Verifies that an immediate terminator produces no output. */
-    private static void testImmediateTerminator() {
+    @Test
+    void testImmediateTerminator() {
         String actual = runApplication("0 0");
 
-        checkEquals(
+        assertEquals(
             "",
             actual,
             "An immediate terminator should produce no output"
@@ -95,7 +88,8 @@ public class MinesweeperApplicationTest {
     }
 
     /** Verifies rejection of a null input scanner. */
-    private static void testNullSource() {
+    @Test
+    void testNullSource() {
         ByteArrayOutputStream capturedOutput =
             new ByteArrayOutputStream();
 
@@ -103,7 +97,7 @@ public class MinesweeperApplicationTest {
             MinesweeperApplication application =
                 new MinesweeperApplication();
 
-            expectException(
+            assertThrows(
                 NullPointerException.class,
                 () -> application.run(null, output),
                 "run() should reject a null input source"
@@ -112,12 +106,13 @@ public class MinesweeperApplicationTest {
     }
 
     /** Verifies rejection of a null output stream. */
-    private static void testNullOutput() {
+    @Test
+    void testNullOutput() {
         try (Scanner source = new Scanner("0 0")) {
             MinesweeperApplication application =
                 new MinesweeperApplication();
 
-            expectException(
+            assertThrows(
                 NullPointerException.class,
                 () -> application.run(source, null),
                 "run() should reject a null output stream"
@@ -126,14 +121,15 @@ public class MinesweeperApplicationTest {
     }
 
     /** Verifies propagation of malformed-field errors. */
-    private static void testMalformedField() {
+    @Test
+    void testMalformedField() {
         String input =
             "2 3\n"
             + "...\n"
             + "..\n"
             + "0 0";
 
-        expectException(
+        assertThrows(
             IllegalStateException.class,
             () -> runApplication(input),
             "Application should reject a row with the wrong length"
@@ -162,93 +158,5 @@ public class MinesweeperApplicationTest {
 
             return capturedOutput.toString();
         }
-    }
-
-    /**
-     * Fails the test run when a condition is false.
-     *
-     * @param condition condition that must hold
-     * @param message failure message
-     */
-    private static void check(
-            boolean condition,
-            String message) {
-
-        if (!condition) {
-            throw new AssertionError(message);
-        }
-    }
-
-    /**
-     * Checks two strings for exact equality.
-     *
-     * @param expected expected text
-     * @param actual actual text
-     * @param message failure message
-     */
-    private static void checkEquals(
-            String expected,
-            String actual,
-            String message) {
-
-        if (!expected.equals(actual)) {
-            throw new AssertionError(
-                message
-                    + "\nExpected:\n"
-                    + showWhitespace(expected)
-                    + "\nActual:\n"
-                    + showWhitespace(actual)
-            );
-        }
-    }
-
-    /**
-     * Makes spaces and line endings visible in assertion messages.
-     *
-     * @param text text to annotate
-     * @return text with visible whitespace markers
-     */
-    private static String showWhitespace(String text) {
-        return text
-            .replace(" ", "·")
-            .replace("\r", "\\r")
-            .replace("\n", "\\n\n");
-    }
-
-    /**
-     * Verifies that an action throws the expected exception type.
-     *
-     * @param expectedType expected exception class
-     * @param action action to execute
-     * @param message failure message
-     */
-    private static void expectException(
-            Class<? extends Throwable> expectedType,
-            Runnable action,
-            String message) {
-
-        try {
-            action.run();
-        } catch (Throwable exception) {
-            if (expectedType.isInstance(exception)) {
-                return;
-            }
-
-            throw new AssertionError(
-                message
-                    + "; expected "
-                    + expectedType.getSimpleName()
-                    + " but received "
-                    + exception.getClass().getSimpleName(),
-                exception
-            );
-        }
-
-        throw new AssertionError(
-            message
-                + "; expected "
-                + expectedType.getSimpleName()
-                + " but no exception was thrown"
-        );
     }
 }

@@ -1,41 +1,18 @@
 package minesweeper;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Random;
 
 /** Exercises game actions, state transitions, and coordinate validation. */
-public class GameTester {
+public class GameTest {
 
-    /**
-     * Runs all {@link Game} tests.
-     *
-     * @param args command-line arguments; ignored
-     */
-    public static void main(String[] args) {
-        testConstructorAndInitialState();
-        testNumberedSquareReveal();
-        testZeroRegionRevealAndWin();
-        testFinalSafeSquareWinsGame();
-        testMineRevealLosesGame();
-        testFlaggingAndUnflagging();
-
-        testInitialRemainingMineCount();
-        testInitialRemainingMineCountForEveryDifficulty();
-        testFlagChangesRemainingMineCount();
-        testIncorrectFlagChangesRemainingMineCount();
-        testRemainingMineCountCanBecomeNegative();
-        testFreshGameResetsRemainingMineCount();
-
-        testFlaggedSquareCannotBeRevealed();
-        testRevealedSquareCannotBeFlagged();
-        testActionsAfterWinDoNothing();
-        testActionsAfterLossDoNothing();
-        testInvalidCoordinates();
-
-        System.out.println("All Game tests passed.");
-    }
 
     /** Verifies construction, initial status, dimensions, and null rejection. */
-    private static void testConstructorAndInitialState() {
+    @Test
+    void testConstructorAndInitialState() {
         MineField field = new MineField(
             new String[]{
                 "*.",
@@ -45,18 +22,18 @@ public class GameTester {
 
         Game game = new Game(field);
 
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.IN_PROGRESS,
             "A new game should be in progress"
         );
-        check(game.numRows() == 2, "Game should report 2 rows");
-        check(game.numCols() == 2, "Game should report 2 columns");
-        check(
+        assertTrue(game.numRows() == 2, "Game should report 2 rows");
+        assertTrue(game.numCols() == 2, "Game should report 2 columns");
+        assertTrue(
             game.getSquare(0, 0) == field.getSquare(0, 0),
             "Game should provide access to squares in its field"
         );
 
-        expectException(
+        assertThrows(
             NullPointerException.class,
             () -> new Game(null),
             "Game should reject a null MineField"
@@ -64,7 +41,8 @@ public class GameTester {
     }
 
     /** Verifies that revealing a numbered square does not expand a region. */
-    private static void testNumberedSquareReveal() {
+    @Test
+    void testNumberedSquareReveal() {
         Game game = new Game(
             new MineField(
                 new String[]{
@@ -75,7 +53,7 @@ public class GameTester {
             )
         );
 
-        check(
+        assertTrue(
             game.getSquare(0, 1).getAdjacentMineCount() == 1,
             "Test setup requires a numbered starting square"
         );
@@ -96,14 +74,15 @@ public class GameTester {
             SquareState.HIDDEN,
             "A numbered square should not reveal its neighbors"
         );
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.IN_PROGRESS,
             "Game should remain in progress when safe squares remain hidden"
         );
     }
 
     /** Verifies zero-region expansion and the resulting win. */
-    private static void testZeroRegionRevealAndWin() {
+    @Test
+    void testZeroRegionRevealAndWin() {
         Game game = new Game(
             new MineField(
                 new String[]{
@@ -115,7 +94,7 @@ public class GameTester {
             )
         );
 
-        check(
+        assertTrue(
             game.getSquare(3, 3).getAdjacentMineCount() == 0,
             "Test setup requires a zero-count starting square"
         );
@@ -146,14 +125,15 @@ public class GameTester {
             }
         }
 
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.WON,
             "Revealing every safe square through region expansion should win"
         );
     }
 
     /** Verifies that revealing the last safe square wins the game. */
-    private static void testFinalSafeSquareWinsGame() {
+    @Test
+    void testFinalSafeSquareWinsGame() {
         Game game = new Game(
             new MineField(
                 new String[]{
@@ -172,14 +152,15 @@ public class GameTester {
             SquareState.REVEALED,
             "The final safe square should be revealed"
         );
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.WON,
             "Revealing the final safe square should win the game"
         );
     }
 
     /** Verifies that revealing a mine loses the game. */
-    private static void testMineRevealLosesGame() {
+    @Test
+    void testMineRevealLosesGame() {
         Game game = new Game(
             new MineField(
                 new String[]{
@@ -205,14 +186,15 @@ public class GameTester {
             SquareState.HIDDEN,
             "Other mines should remain hidden"
         );
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.LOST,
             "Revealing a mine should lose the game"
         );
     }
 
     /** Verifies flag placement and removal. */
-    private static void testFlaggingAndUnflagging() {
+    @Test
+    void testFlaggingAndUnflagging() {
         Game game = new Game(
             new MineField(
                 new String[]{
@@ -240,24 +222,26 @@ public class GameTester {
             "A flagged square should become hidden when toggled again"
         );
 
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.IN_PROGRESS,
             "Flagging should not change the game status"
         );
     }
 
     /** Verifies that a new game reports its complete mine count. */
-    private static void testInitialRemainingMineCount() {
+    @Test
+    void testInitialRemainingMineCount() {
         Game game = createTwoMineGame();
 
-        check(
+        assertTrue(
             game.numRemainingMines() == 2,
             "A new two-mine game should report 2 remaining mines"
         );
     }
 
     /** Verifies the initial counter for every selectable difficulty. */
-    private static void testInitialRemainingMineCountForEveryDifficulty() {
+    @Test
+    void testInitialRemainingMineCountForEveryDifficulty() {
         verifyInitialRemainingMineCount(
             Difficulty.BEGINNER,
             10,
@@ -292,7 +276,7 @@ public class GameTester {
 
         Game game = new Game(generator.generate(difficulty));
 
-        check(
+        assertTrue(
             game.numRemainingMines() == expectedMineCount,
             difficulty + " should initially report "
                 + expectedMineCount + " remaining mines, but reported "
@@ -301,29 +285,31 @@ public class GameTester {
     }
 
     /** Verifies that flagging and unflagging change the remaining count. */
-    private static void testFlagChangesRemainingMineCount() {
+    @Test
+    void testFlagChangesRemainingMineCount() {
         Game game = createTwoMineGame();
 
         game.toggleFlag(0, 1);
 
-        check(
+        assertTrue(
             game.numRemainingMines() == 1,
             "Placing one flag should reduce the remaining count to 1"
         );
 
         game.toggleFlag(0, 1);
 
-        check(
+        assertTrue(
             game.numRemainingMines() == 2,
             "Removing the flag should restore the remaining count to 2"
         );
     }
 
     /** Verifies that an incorrectly placed flag still affects the count. */
-    private static void testIncorrectFlagChangesRemainingMineCount() {
+    @Test
+    void testIncorrectFlagChangesRemainingMineCount() {
         Game game = createTwoMineGame();
 
-        check(
+        assertTrue(
             !game.getSquare(1, 1).hasMine(),
             "Test setup requires (1, 1) to be a safe square"
         );
@@ -337,54 +323,57 @@ public class GameTester {
             SquareState.FLAGGED,
             "The safe square should be flagged"
         );
-        check(
+        assertTrue(
             game.numRemainingMines() == 1,
             "A flag on a safe square should still reduce the remaining count"
         );
     }
 
     /** Verifies that excess flags can produce a negative count. */
-    private static void testRemainingMineCountCanBecomeNegative() {
+    @Test
+    void testRemainingMineCountCanBecomeNegative() {
         Game game = createTwoMineGame();
 
         game.toggleFlag(0, 1);
         game.toggleFlag(0, 2);
 
-        check(
+        assertTrue(
             game.numRemainingMines() == 0,
             "Two flags on a two-mine field should produce a count of 0"
         );
 
         game.toggleFlag(1, 0);
 
-        check(
+        assertTrue(
             game.numRemainingMines() == -1,
             "Three flags on a two-mine field should produce a count of -1"
         );
     }
 
     /** Verifies that a fresh game starts with a reset counter. */
-    private static void testFreshGameResetsRemainingMineCount() {
+    @Test
+    void testFreshGameResetsRemainingMineCount() {
         Game firstGame = createTwoMineGame();
 
         firstGame.toggleFlag(0, 1);
         firstGame.toggleFlag(0, 2);
 
-        check(
+        assertTrue(
             firstGame.numRemainingMines() == 0,
             "Test setup should reduce the first game's count to 0"
         );
 
         Game newGame = createTwoMineGame();
 
-        check(
+        assertTrue(
             newGame.numRemainingMines() == 2,
             "A fresh game should reset the remaining count to 2"
         );
     }
 
     /** Verifies that a flagged square cannot be revealed. */
-    private static void testFlaggedSquareCannotBeRevealed() {
+    @Test
+    void testFlaggedSquareCannotBeRevealed() {
         Game game = new Game(
             new MineField(
                 new String[]{
@@ -404,14 +393,15 @@ public class GameTester {
             SquareState.FLAGGED,
             "A flagged mine should not be revealed"
         );
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.IN_PROGRESS,
             "Trying to reveal a flagged mine should not lose the game"
         );
     }
 
     /** Verifies that a revealed square cannot be flagged. */
-    private static void testRevealedSquareCannotBeFlagged() {
+    @Test
+    void testRevealedSquareCannotBeFlagged() {
         Game game = new Game(
             new MineField(
                 new String[]{
@@ -435,7 +425,8 @@ public class GameTester {
     }
 
     /** Verifies that player actions are ignored after a win. */
-    private static void testActionsAfterWinDoNothing() {
+    @Test
+    void testActionsAfterWinDoNothing() {
         Game game = new Game(
             new MineField(
                 new String[]{
@@ -446,7 +437,7 @@ public class GameTester {
         );
 
         game.revealSquare(0, 1);
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.WON,
             "Test setup should produce a win"
         );
@@ -468,14 +459,15 @@ public class GameTester {
             SquareState.HIDDEN,
             "A square should not be flagged after the game is won"
         );
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.WON,
             "The game should remain won after ignored actions"
         );
     }
 
     /** Verifies that player actions are ignored after a loss. */
-    private static void testActionsAfterLossDoNothing() {
+    @Test
+    void testActionsAfterLossDoNothing() {
         Game game = new Game(
             new MineField(
                 new String[]{
@@ -486,7 +478,7 @@ public class GameTester {
         );
 
         game.revealSquare(0, 0);
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.LOST,
             "Test setup should produce a loss"
         );
@@ -508,14 +500,15 @@ public class GameTester {
             SquareState.HIDDEN,
             "A square should not be flagged after a loss"
         );
-        check(
+        assertTrue(
             game.getStatus() == GameStatus.LOST,
             "The game should remain lost after ignored actions"
         );
     }
 
     /** Verifies that square operations reject out-of-range coordinates. */
-    private static void testInvalidCoordinates() {
+    @Test
+    void testInvalidCoordinates() {
         Game game = new Game(
             new MineField(
                 new String[]{
@@ -525,27 +518,27 @@ public class GameTester {
             )
         );
 
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> game.revealSquare(-1, 0),
             "revealSquare should reject a negative row"
         );
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> game.revealSquare(0, -1),
             "revealSquare should reject a negative column"
         );
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> game.revealSquare(2, 0),
             "revealSquare should reject a row beyond the field"
         );
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> game.toggleFlag(0, 2),
             "toggleFlag should reject a column beyond the field"
         );
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> game.getSquare(2, 0),
             "getSquare should reject an invalid position"
@@ -553,12 +546,12 @@ public class GameTester {
 
         game.revealSquare(0, 0);
 
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> game.revealSquare(-1, 0),
             "revealSquare should still validate coordinates after game over"
         );
-        expectException(
+        assertThrows(
             IndexOutOfBoundsException.class,
             () -> game.toggleFlag(-1, 0),
             "toggleFlag should still validate coordinates after game over"
@@ -596,56 +589,11 @@ public class GameTester {
     ) {
         SquareState actualState = game.getSquare(row, col).getState();
 
-        check(
+        assertTrue(
             actualState == expectedState,
             message + " at (" + row + ", " + col + ")"
                 + "; expected " + expectedState
                 + " but found " + actualState
-        );
-    }
-
-    /**
-     * Fails the test run when a condition is false.
-     *
-     * @param condition condition that must hold
-     * @param message failure message
-     */
-    private static void check(boolean condition, String message) {
-        if (!condition) {
-            throw new AssertionError(message);
-        }
-    }
-
-    /**
-     * Verifies that an action throws the expected exception type.
-     *
-     * @param expectedType expected exception class
-     * @param action action to execute
-     * @param message failure message
-     */
-    private static void expectException(
-        Class<? extends Throwable> expectedType,
-        Runnable action,
-        String message
-    ) {
-        try {
-            action.run();
-        } catch (Throwable exception) {
-            if (expectedType.isInstance(exception)) {
-                return;
-            }
-
-            throw new AssertionError(
-                message + "; expected "
-                    + expectedType.getSimpleName()
-                    + " but received "
-                    + exception.getClass().getSimpleName(),
-                exception
-            );
-        }
-
-        throw new AssertionError(
-            message + "; expected " + expectedType.getSimpleName()
         );
     }
 }

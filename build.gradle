@@ -2,6 +2,16 @@ plugins {
     id 'application'
 }
 
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -35,41 +45,6 @@ tasks.register('runConsole', JavaExec) {
     standardInput = System.in
 }
 
-// The current tester classes use main methods rather than JUnit.
-def testerClasses = [
-    'minesweeper.GameTester',
-    'minesweeper.MineFieldGeneratorTester',
-    'minesweeper.MineFieldReaderTest',
-    'minesweeper.MineFieldTester',
-    'minesweeper.MinesweeperApplicationTest'
-]
-
-def testerTasks = testerClasses.collect { testerClass ->
-    def simpleName =
-        testerClass.substring(testerClass.lastIndexOf('.') + 1)
-
-    tasks.register("run${simpleName}", JavaExec) {
-        group = 'verification'
-        description = "Runs ${testerClass}."
-
-        dependsOn tasks.named('testClasses')
-        classpath = sourceSets.test.runtimeClasspath
-        mainClass.set(testerClass)
-    }
-}
-
-tasks.register('runAllTests') {
-    group = 'verification'
-    description = 'Runs all standalone tester classes.'
-    dependsOn testerTasks
-}
-
-// The normal Gradle test task expects JUnit or another testing framework.
 tasks.named('test') {
-    enabled = false
-}
-
-// Include the standalone testers in Gradle's verification lifecycle.
-tasks.named('check') {
-    dependsOn tasks.named('runAllTests')
+    useJUnitPlatform()
 }
