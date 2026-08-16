@@ -103,4 +103,18 @@ public class MineFieldGenerator {
 
         return positions;
     }
+
+    public MineField generate(Difficulty difficulty) {
+        Objects.requireNonNull(
+            difficulty, 
+            "Difficulty level cannot be null."
+        );
+        
+        return generate(
+            difficulty.getRows(), 
+            difficulty.getColumns(), 
+            difficulty.getMineCount()
+        );
+    }
+
 }

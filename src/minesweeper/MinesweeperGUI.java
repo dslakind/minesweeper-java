@@ -3,6 +3,7 @@ package minesweeper;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Font;
@@ -11,6 +12,7 @@ import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -18,7 +20,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 /**
- * Swing window for playing a standard beginner Minesweeper game.
+ * Swing window for playing a standard3e Minesweeper game.
  * Left-clicking reveals squares, right-clicking toggles flags, and the new-game
  * button creates a fresh randomized board.
  */
@@ -26,6 +28,8 @@ public class MinesweeperGUI extends JFrame {
     // instance variables
     /** Game currently displayed by this window. */
     private Game currentGame;
+    // User selected difficulty; default to BEGINNER
+    private Difficulty selectedDifficulty;
     /** Generator used to create each new field. */
     private final MineFieldGenerator fieldGenerator;
     /** Container that arranges the square buttons. */
@@ -34,11 +38,9 @@ public class MinesweeperGUI extends JFrame {
     private final JLabel gameStatusLabel;
     /** Buttons indexed by their corresponding field coordinates. */
     private JButton[][] squareButtons;
+    private JComboBox<Difficulty> difficultyJComboBox;
 
     // constants
-    private static final int ROWS = 9;
-    private static final int COLUMNS = 9;
-    private static final int MINES = 10;
     private static final int SQUARE_SIZE = 40;
     private static final String MINE_SYMBOL = "\u2738"; //💣"\uD83D\uDCA3"
     private static final Color HIDDEN_BACKGROUND =
@@ -53,9 +55,6 @@ public class MinesweeperGUI extends JFrame {
     private static final Color EXPLODED_MINE_BACKGROUND =
         new Color(220, 60, 60);
 
-    // private static final Color OTHER_MINE_BACKGROUND =
-    //     new Color(80, 80, 80); 
-        
     private static final Color IN_PROGRESS_COLOR =
         new Color(70, 70, 70);
 
@@ -75,7 +74,12 @@ public class MinesweeperGUI extends JFrame {
     public MinesweeperGUI() {
         
         fieldGenerator = new MineFieldGenerator();
-        currentGame = new Game(fieldGenerator.generate(ROWS, COLUMNS, MINES));
+        selectedDifficulty = Difficulty.BEGINNER;
+        currentGame = new Game(fieldGenerator.generate(
+            selectedDifficulty.getRows(), 
+            selectedDifficulty.getColumns(), 
+            selectedDifficulty.getMineCount())
+        );
 
         setTitle("Minesweeper");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -83,6 +87,19 @@ public class MinesweeperGUI extends JFrame {
         
         gameStatusLabel = new JLabel("Game in progress.");
         gameStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BorderLayout()); 
+        
+        JPanel difficultyJPanel = new JPanel();
+        difficultyJPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        JLabel difficultyLabel = new JLabel("Difficulty: ");
+        difficultyJComboBox = new JComboBox<>(Difficulty.values());
+        difficultyJComboBox.getSelectedItem();
+        difficultyJPanel.add(difficultyLabel);
+        difficultyJPanel.add(difficultyJComboBox);
+        headerPanel.add(gameStatusLabel, BorderLayout.CENTER);
+        headerPanel.add(difficultyJPanel, BorderLayout.EAST);
+        
         gameStatusLabel.setFont(
             new Font(Font.SANS_SERIF, Font.BOLD, 16)
         );
@@ -101,10 +118,19 @@ public class MinesweeperGUI extends JFrame {
         newGameButton.addActionListener(
             event -> startNewGame()
         );        
+
+        // Add an action listener to the difficulty combo box.
+        difficultyJComboBox.addActionListener( e -> {
+            Object item = difficultyJComboBox.getSelectedItem();            
+            if (item != null) {
+                selectedDifficulty = (Difficulty) item; 
+            }
+        });
  
-        add(gameStatusLabel, BorderLayout.NORTH);
+        add(headerPanel, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
         add(newGameButton, BorderLayout.SOUTH);
+
 
         buildBoard(); // add the field buttons to the window
         pack(); // size window to the contents
@@ -286,7 +312,11 @@ public class MinesweeperGUI extends JFrame {
 
     /** Generates a fresh minefield and rebuilds the board controls. */
     private void startNewGame() {
-        currentGame = new Game(fieldGenerator.generate(ROWS, COLUMNS, MINES));
+        currentGame = new Game(fieldGenerator.generate(
+            selectedDifficulty.getRows(), 
+            selectedDifficulty.getColumns(), 
+            selectedDifficulty.getMineCount() 
+        ));
 
         buildBoard();
         boardPanel.revalidate();
