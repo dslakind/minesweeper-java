@@ -18,6 +18,10 @@ public class MineFieldGeneratorTester {
         testZeroMines();
         testMaximumLegalMineCount();
         testRepeatabilityWithFixedSeed();
+        testBeginnerConfiguration();
+        testIntermediateConfiguration();
+        testExpertConfiguration();
+        testNullDifficulty();
         testNullRandom();
         testInvalidDimensions();
         testInvalidMineCounts();
@@ -109,6 +113,45 @@ public class MineFieldGeneratorTester {
 
         verifyGeneratedField(first, 7, 11, 15);
         verifyGeneratedField(second, 7, 11, 15);
+    }
+
+    /** Verifies generation using the beginner difficulty settings. */
+    private static void testBeginnerConfiguration() {
+        MineFieldGenerator generator =
+            new MineFieldGenerator(new Random(500L));
+        MineField field = generator.generate(Difficulty.BEGINNER);
+
+        verifyGeneratedField(field, 9, 9, 10);
+    }
+
+    /** Verifies generation using the intermediate difficulty settings. */
+    private static void testIntermediateConfiguration() {
+        MineFieldGenerator generator =
+            new MineFieldGenerator(new Random(600L));
+        MineField field = generator.generate(Difficulty.INTERMEDIATE);
+
+        verifyGeneratedField(field, 16, 16, 40);
+    }
+
+    /** Verifies generation using the expert difficulty settings. */
+    private static void testExpertConfiguration() {
+        MineFieldGenerator generator =
+            new MineFieldGenerator(new Random(700L));
+        MineField field = generator.generate(Difficulty.EXPERT);
+
+        verifyGeneratedField(field, 16, 30, 99);
+    }
+
+    /** Verifies that the generator rejects a null difficulty. */
+    private static void testNullDifficulty() {
+        MineFieldGenerator generator =
+            new MineFieldGenerator(new Random(800L));
+
+        expectException(
+            NullPointerException.class,
+            () -> generator.generate((Difficulty) null),
+            "Generator should reject a null Difficulty"
+        );
     }
 
     /** Verifies that the generator rejects a null random source. */
