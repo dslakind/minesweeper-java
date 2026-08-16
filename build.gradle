@@ -1,0 +1,75 @@
+plugins {
+    id 'application'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ['test']
+        }
+    }
+}
+
+application {
+    mainClass = 'minesweeper.MinesweeperGUIApplication'
+}
+
+tasks.register('runConsole', JavaExec) {
+    group = 'application'
+    description = 'Runs the console Minesweeper application.'
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'minesweeper.MinesweeperApplication'
+    standardInput = System.in
+}
+
+// The current tester classes use main methods rather than JUnit.
+def testerClasses = [
+    'minesweeper.GameTester',
+    'minesweeper.MineFieldGeneratorTester',
+    'minesweeper.MineFieldReaderTest',
+    'minesweeper.MineFieldTester',
+    'minesweeper.MinesweeperApplicationTest'
+]
+
+def testerTasks = testerClasses.collect { testerClass ->
+    def simpleName =
+        testerClass.substring(testerClass.lastIndexOf('.') + 1)
+
+    tasks.register("run${simpleName}", JavaExec) {
+        group = 'verification'
+        description = "Runs ${testerClass}."
+
+        dependsOn tasks.named('testClasses')
+        classpath = sourceSets.test.runtimeClasspath
+        mainClass.set(testerClass)
+    }
+}
+
+tasks.register('runAllTests') {
+    group = 'verification'
+    description = 'Runs all standalone tester classes.'
+    dependsOn testerTasks
+}
+
+// The normal Gradle test task expects JUnit or another testing framework.
+tasks.named('test') {
+    enabled = false
+}
+
+// Include the standalone testers in Gradle's verification lifecycle.
+tasks.named('check') {
+    dependsOn tasks.named('runAllTests')
+}
