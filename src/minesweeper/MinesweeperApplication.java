@@ -30,6 +30,12 @@ public class MinesweeperApplication {
         outputFields(output);
     }
 
+    /**
+     * Writes all loaded fields, separated by one blank line.
+     *
+     * @param output destination for the formatted fields
+     * @throws NullPointerException if {@code output} is {@code null}
+     */
     private void outputFields(PrintStream output) {
         Objects.requireNonNull(output, "Output stream cannot be null");
         for (int i = 0; i < fields.size(); i++) {

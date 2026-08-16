@@ -34,25 +34,25 @@ public class Game {
         Square square = field.getSquare(row, col);
 
         if (status != GameStatus.IN_PROGRESS) {
-            return; // do nothing
+            return;
         }
 
         if (square.getState() == SquareState.FLAGGED 
             || square.getState() == SquareState.REVEALED) {
-            return; // do nothing
+            return;
         }
 
         if (square.hasMine()) {
             square.reveal();
             status = GameStatus.LOST;
-            return; // game over
+            return;
         } 
         
         field.revealRegion(row, col);
         
         if (field.allSafeSquaresRevealed()) {
             status = GameStatus.WON;
-            return; // game over
+            return;
         }
     }
 
@@ -109,7 +109,13 @@ public class Game {
         return field.getSquare(row, col);
     }
 
-    /** @return the number of remaining mines  */
+    /**
+     * Returns the mine count minus the number of placed flags.
+     * The result may be negative when the player places more flags than there
+     * are mines.
+     *
+     * @return estimated number of unflagged mines
+     */
     public int numRemainingMines() {
         return field.numMines() - field.numFlags();
     }

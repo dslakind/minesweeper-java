@@ -20,7 +20,7 @@ public class MineField {
      *         or contains an unsupported character
      */
     public MineField(String[] rows) {
-        // validate that the matrix is nonempty and rectangular
+        // Validate the input shape before allocating the square matrix.
         Objects.requireNonNull(rows, "MineField requires a String[] to process");
         int index = 0;
         if (rows.length == 0) {
@@ -48,7 +48,7 @@ public class MineField {
 
         squares = new Square[rows.length][len];
 
-        // initialize squares 
+        // Convert each input symbol into its corresponding square.
         for (int row = 0; row < rows.length; row++) {
             String line = rows[row];
             for (int col = 0; col < len; col++) {
@@ -66,7 +66,7 @@ public class MineField {
             }
         }
 
-        // update squares with number of adjacent mines
+        // Cache adjacency counts after every mine has been placed.
         calculateAdjacentMines();
     }
 
@@ -118,18 +118,13 @@ public class MineField {
     }
 
     private boolean isEligibleForRegionReveal(int row, int col){
-        // Are the coordinates valid?
         if (!isValidSquare(row, col)) {
             return false;
         } 
 
-        // Is the square already revealed?
-        // Is the square flagged?
-        // Does it contain a mine?
-        return 
-            getSquare(row, col).getState() != SquareState.REVEALED &&
-            getSquare(row, col).getState() != SquareState.FLAGGED &&
-            !getSquare(row, col).hasMine();
+        return getSquare(row, col).getState() != SquareState.REVEALED
+            && getSquare(row, col).getState() != SquareState.FLAGGED
+            && !getSquare(row, col).hasMine();
     }
 
     /**
@@ -151,10 +146,10 @@ public class MineField {
             return;
         }
 
-        // The queue contains coordinates waiting to be processed.
+        // Process the region iteratively to avoid overflowing the call stack.
         Queue<Position> positionsToProcess = new ArrayDeque<>();
         
-        // A boolean[][] to record which positions have already been placed in the queue
+        // Schedule each position at most once, even when regions converge on it.
         boolean[][] scheduledPositions = new boolean[numRows()][numCols()];
 
         positionsToProcess.offer(new Position(row, col));
@@ -173,7 +168,7 @@ public class MineField {
             Square currSquare = getSquare(currRow, currCol);
             currSquare.reveal();
 
-            // Examining neighbors
+            // Numbered squares form the boundary and do not expand the region.
             if (currSquare.getAdjacentMineCount() == 0) {
                 for(int r = currRow - 1; r <= currRow + 1; r++) {
                     for(int c = currCol - 1; c <= currCol + 1; c++) {
@@ -240,7 +235,11 @@ public class MineField {
         squares[row][col].setAdjacentMineCount(result);
     }
 
-    /** counts squares containing mines */
+    /**
+     * Counts the squares containing mines.
+     *
+     * @return total number of mines in the field
+     */
     public int numMines() {
         int mines = 0;
         for (int row = 0; row < numRows(); row++) {
@@ -254,6 +253,11 @@ public class MineField {
         return mines;
     }
 
+    /**
+     * Counts the squares currently marked with flags.
+     *
+     * @return total number of placed flags
+     */
     public int numFlags() {
         int flags = 0;
         for (int row = 0; row < numRows(); row++) {

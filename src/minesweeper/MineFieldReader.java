@@ -33,7 +33,7 @@ public class MineFieldReader {
     public List<MineField> readFields() {
         List<MineField> fields = new ArrayList<>();
 
-        // read the next dimension line, with number of rows and cols
+        // Each field begins with its row and column counts.
         while (source.hasNext()) {
             if (!source.hasNextInt()) {
                 throw new IllegalStateException(
@@ -49,7 +49,7 @@ public class MineFieldReader {
             }
             int cols = source.nextInt();
 
-             // Process dimensions and field...
+            // A pair of zeroes terminates the complete input stream.
             if (rows == 0 && cols == 0) {
                 break;
             } else if (rows == 0) {
@@ -65,17 +65,23 @@ public class MineFieldReader {
                     "Field dimensions must be between 1 and 100"
                 );
             }
-            source.nextLine(); // consume the remainder of the dimension line
+            // Move to the first field row after reading the numeric header.
+            source.nextLine();
 
-            // construct the new field using lines. 
             fields.add(readField(rows, cols));
         }
         
         return fields;
     }
 
+    /**
+     * Reads and validates the declared number of rows for one field.
+     *
+     * @param rows number of rows to read
+     * @param cols required width of each row
+     * @return minefield constructed from the validated rows
+     */
     private MineField readField(int rows, int cols) {
-        // read the field data
         String[] lines = new String[rows];
 
         for (int i = 0; i < rows; i++) {
@@ -92,7 +98,6 @@ public class MineFieldReader {
             }
         }
 
-        // construct the new field using lines. 
         return new MineField(lines);
 
     }

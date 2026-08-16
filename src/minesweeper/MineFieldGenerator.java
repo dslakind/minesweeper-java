@@ -37,7 +37,7 @@ public class MineFieldGenerator {
      * @throws IllegalArgumentException if the dimensions or mine count are invalid
      */
     public MineField generate(int rows, int columns, int mineCount) {
-        // verify valid dimensions
+        // Validate before multiplying the dimensions or allocating the field.
         if (rows <= 0 || columns <= 0) {
             throw new IllegalArgumentException(
                 "MineField cannot have " + rows + " rows and " 
@@ -45,7 +45,7 @@ public class MineFieldGenerator {
             );
         }
 
-        // check for valid number of mines
+        // Leave at least one safe square so every generated game is playable.
         if (mineCount < 0 || mineCount >= rows * columns) {
             throw new IllegalArgumentException(
                 "MineField cannot have " + mineCount + " mines for a field with " +
@@ -58,14 +58,14 @@ public class MineFieldGenerator {
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < columns; c++) {
-                chars[r][c] = '.'; // all safe squares
+                chars[r][c] = '.';
             }
         }
 
-        // select random mine positions
+        // The shuffled positions guarantee that mine locations are distinct.
         int[] randomPositions = getRandomMinePositions(rows, columns);
 
-        // replace safe squares with bombs at first mineCount positions
+        // Place mines at the requested prefix of the shuffled positions.
         for (int i = 0; i < mineCount; i++) {
             int pos = randomPositions[i];
             int row = pos / columns;
@@ -73,7 +73,7 @@ public class MineFieldGenerator {
             chars[row][col] = '*';
         }
 
-        // Convert every character row into a String.
+        // Convert the mutable construction matrix into MineField input rows.
         String[] rowStrings = new String[rows];
         for (int r = 0; r < rows; r++) {
             rowStrings[r] = new String(chars[r]);
@@ -82,7 +82,13 @@ public class MineFieldGenerator {
         return new MineField(rowStrings);
     }
 
-    // Select the mine positions.
+    /**
+     * Returns every field position in uniformly shuffled order.
+     *
+     * @param rows number of field rows
+     * @param columns number of field columns
+     * @return shuffled linear indexes for all field positions
+     */
     private int[] getRandomMinePositions(int rows, int columns) {
         int[] positions = new int[rows * columns];
         for (int r = 0; r < rows; r++) {
@@ -91,11 +97,10 @@ public class MineFieldGenerator {
             }
         }
 
-        // shuffle positions  The Fisher-Yates Shuffle
+        // Apply an in-place Fisher-Yates shuffle.
         for (int i = positions.length - 1; i > 0; i--) {
             int index = rand.nextInt(i + 1);
 
-            // swap
             int temp = positions[i];
             positions[i] = positions[index];
             positions[index] = temp;
@@ -104,6 +109,13 @@ public class MineFieldGenerator {
         return positions;
     }
 
+    /**
+     * Generates a field using a predefined difficulty configuration.
+     *
+     * @param difficulty dimensions and mine count to use
+     * @return newly generated minefield
+     * @throws NullPointerException if {@code difficulty} is {@code null}
+     */
     public MineField generate(Difficulty difficulty) {
         Objects.requireNonNull(
             difficulty, 
