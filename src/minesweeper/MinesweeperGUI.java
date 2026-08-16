@@ -36,14 +36,17 @@ public class MinesweeperGUI extends JFrame {
     private final JPanel boardPanel;
     /** Container for the boardPanel and Square buttons */
     private final JPanel boardContainer;
+    private final JPanel statisticsPanel;
     /** Label displaying whether the game is active, won, or lost. */
     private final JLabel gameStatusLabel;
     private final JLabel remainingMineLabel;
+    private final javax.swing.Timer timer;
+    private final JLabel elapsedTimeLabel;
+    private int elapsedSeconds;
     /** Buttons indexed by their corresponding field coordinates. */
     private JButton[][] squareButtons;
     private JComboBox<Difficulty> difficultyJComboBox;
 
-    // constants
     private static final int SQUARE_SIZE = 40;
     private static final String MINE_SYMBOL = "\u2738"; //💣"\uD83D\uDCA3"
     private static final Color HIDDEN_BACKGROUND =
@@ -105,7 +108,6 @@ public class MinesweeperGUI extends JFrame {
         difficultyJPanel.add(difficultyLabel);
         difficultyJPanel.add(difficultyJComboBox);
         headerPanel.add(gameStatusLabel, BorderLayout.CENTER);
-        headerPanel.add(remainingMineLabel, BorderLayout.WEST);
         headerPanel.add(difficultyJPanel, BorderLayout.EAST);
         
         gameStatusLabel.setFont(
@@ -124,6 +126,18 @@ public class MinesweeperGUI extends JFrame {
 
         boardContainer = new JPanel();
         boardContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+
+        statisticsPanel = new JPanel();
+        statisticsPanel.setLayout(new GridLayout(2, 1));
+        statisticsPanel.add(remainingMineLabel);
+        elapsedTimeLabel = new JLabel("Time: " + elapsedSeconds);
+        timer = new javax.swing.Timer(1000, e -> {
+            elapsedSeconds++;
+            elapsedTimeLabel.setText("Time: " + elapsedSeconds);
+        });
+        statisticsPanel.add(elapsedTimeLabel);
+
+        headerPanel.add(statisticsPanel, BorderLayout.WEST);
 
         boardPanel = new JPanel();
         
@@ -150,6 +164,8 @@ public class MinesweeperGUI extends JFrame {
         boardContainer.add(boardPanel);
         add(newGameButton, BorderLayout.SOUTH);
 
+        elapsedSeconds = 0;
+        headerPanel.add(statisticsPanel, BorderLayout.WEST);        
 
         buildBoard(); // add the field buttons to the window
         pack(); // size window to the contents
@@ -280,15 +296,17 @@ public class MinesweeperGUI extends JFrame {
         // If the game is over, disable every square button.
         if (currentGame.getStatus() != GameStatus.IN_PROGRESS) {
             gameOver();
+            timer.stop();
         }            
         
-        // After updating the buttons, update gameStatusLabel:
+        // After updating the buttons, and labels:
         updateGameStatusLabel();
         updateRemainingMineLabel();
+        updateElapsedTimeLabel();
     }
 
-    /** Displays all mines and removes button borders when the game has ended. */
     private void gameOver() {
+    /** Displays all mines and removes button borders when the game has ended. */
         GameStatus gameStatus = currentGame.getStatus() ;
         // disable every square button.
         if (gameStatus != GameStatus.IN_PROGRESS) {
@@ -315,6 +333,11 @@ public class MinesweeperGUI extends JFrame {
      * @param col zero-based column of the clicked square
      */
     private void handleLeftClick(int row, int col) {
+        if (!timer.isRunning()
+                && currentGame.getStatus() == GameStatus.IN_PROGRESS
+                && currentGame.getSquare(row, col).getState() == SquareState.HIDDEN) {
+            timer.start();
+        }
         currentGame.revealSquare(row, col);
         refreshView();
     }
@@ -332,6 +355,10 @@ public class MinesweeperGUI extends JFrame {
 
     /** Generates a fresh minefield and rebuilds the board controls. */
     private void startNewGame() {
+        timer.stop();
+        elapsedSeconds = 0;
+        updateElapsedTimeLabel();
+
         currentGame = new Game(fieldGenerator.generate(
             selectedDifficulty.getRows(), 
             selectedDifficulty.getColumns(), 
@@ -392,5 +419,9 @@ public class MinesweeperGUI extends JFrame {
 
     private void updateRemainingMineLabel() {
         remainingMineLabel.setText("Mines remaining: " + currentGame.numRemainingMines());
+    }
+
+    private void updateElapsedTimeLabel() {
+        elapsedTimeLabel.setText("Time: " + elapsedSeconds);
     }
 }
